@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sevenstars:qi_crystal_block"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:qi_crystal_shard",
+    "count": 9
+  }
+}

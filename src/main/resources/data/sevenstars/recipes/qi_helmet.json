@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QQQ",
+    "I I"
+  ],
+  "key": {
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "item": "sevenstars:qi_helmet"
+  }
+}

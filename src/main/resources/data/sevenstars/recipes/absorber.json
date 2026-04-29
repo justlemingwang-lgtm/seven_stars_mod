@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " Q ",
+    "RIR",
+    " I "
+  ],
+  "key": {
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "item": "sevenstars:absorber"
+  }
+}

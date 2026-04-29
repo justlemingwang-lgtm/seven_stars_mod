@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PFP",
+    "MBM",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:spruce_planks"
+    },
+    "F": {
+      "item": "sevenstars:hound_fang"
+    },
+    "M": {
+      "item": "sevenstars:black_mane"
+    },
+    "B": {
+      "item": "sevenstars:cracked_claw_bone"
+    }
+  },
+  "result": {
+    "item": "sevenstars:claw_trophy_rack"
+  }
+}

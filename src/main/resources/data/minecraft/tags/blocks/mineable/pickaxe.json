@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "sevenstars:qi_crystal_ore",
+    "sevenstars:deepslate_qi_crystal_ore",
+    "sevenstars:qi_crystal_block",
+    "sevenstars:qi_crystal_lamp",
+    "sevenstars:qi_crystal_bricks",
+    "sevenstars:star_hoof_charm_block",
+    "sevenstars:frost_marrow_candle",
+    "sevenstars:star_cursed_bricks",
+    "sevenstars:cracked_star_cursed_bricks",
+    "sevenstars:star_rune_tiles",
+    "sevenstars:goat_horn_altar",
+    "sevenstars:soul_calming_lamp",
+    "sevenstars:triangle_stone_bricks",
+    "sevenstars:triangle_rune_tiles"
+  ]
+}

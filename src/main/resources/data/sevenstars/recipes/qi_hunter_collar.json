@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LQL",
+    "MFM",
+    " L "
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:leather"
+    },
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    "M": {
+      "item": "sevenstars:black_mane"
+    },
+    "F": {
+      "item": "sevenstars:hound_fang"
+    }
+  },
+  "result": {
+    "item": "sevenstars:qi_hunter_collar"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QQ",
+    "QQ"
+  ],
+  "key": {
+    "Q": {
+      "item": "sevenstars:qi_crystal_block"
+    }
+  },
+  "result": {
+    "item": "sevenstars:qi_crystal_bricks",
+    "count": 4
+  }
+}

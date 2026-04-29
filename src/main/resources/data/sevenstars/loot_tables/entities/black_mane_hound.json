@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "sevenstars:black_mane", "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}}]}], "conditions": [{"condition": "minecraft:random_chance", "chance": 0.7}]},
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "sevenstars:cracked_claw_bone"}], "conditions": [{"condition": "minecraft:random_chance", "chance": 0.35}]},
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "sevenstars:hound_fang"}], "conditions": [{"condition": "minecraft:random_chance", "chance": 0.1}]}
+  ]
+}

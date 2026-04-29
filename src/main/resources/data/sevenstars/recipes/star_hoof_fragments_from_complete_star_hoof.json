@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sevenstars:complete_star_hoof"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:star_hoof_fragment",
+    "count": 4
+  }
+}

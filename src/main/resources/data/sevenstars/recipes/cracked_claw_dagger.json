@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    " B ",
+    " S "
+  ],
+  "key": {
+    "F": {
+      "item": "sevenstars:hound_fang"
+    },
+    "B": {
+      "item": "sevenstars:cracked_claw_bone"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "sevenstars:cracked_claw_dagger"
+  }
+}

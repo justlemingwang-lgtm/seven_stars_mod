@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "sevenstars:qi_crystal_ore",
+    "sevenstars:deepslate_qi_crystal_ore",
+    "sevenstars:qi_crystal_block",
+    "sevenstars:qi_crystal_lamp",
+    "sevenstars:qi_crystal_bricks",
+    "sevenstars:star_cursed_bricks",
+    "sevenstars:cracked_star_cursed_bricks",
+    "sevenstars:goat_horn_altar"
+  ]
+}

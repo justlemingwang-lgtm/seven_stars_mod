@@ -1,0 +1,9 @@
+{
+  "type": "forge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "sevenstars:ore_qi_crystal",
+    "sevenstars:ore_deepslate_qi_crystal"
+  ],
+  "step": "underground_ores"
+}

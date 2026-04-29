@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sevenstars:frost_marrow_crystal"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:frost_powder",
+    "count": 4
+  }
+}

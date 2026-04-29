@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  H",
+    " S ",
+    "S  "
+  ],
+  "key": {
+    "H": {
+      "item": "sevenstars:complete_star_hoof"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "sevenstars:star_hoof_spear"
+  }
+}

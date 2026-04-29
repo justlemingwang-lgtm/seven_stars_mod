@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "sevenstars:block/qi_crystal_bricks"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:cooked_beef"
+    },
+    {
+      "item": "sevenstars:black_mane"
+    },
+    {
+      "item": "sevenstars:qi_crystal_shard"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:hound_jerky"
+  }
+}

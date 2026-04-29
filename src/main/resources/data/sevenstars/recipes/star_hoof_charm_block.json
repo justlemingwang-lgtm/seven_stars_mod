@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GSG",
+    " Q ",
+    "GSG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_nugget"
+    },
+    "S": {
+      "item": "sevenstars:star_hoof_fragment"
+    },
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    }
+  },
+  "result": {
+    "item": "sevenstars:star_hoof_charm_block"
+  }
+}

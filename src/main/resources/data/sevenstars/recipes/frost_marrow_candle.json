@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sevenstars:frost_marrow_crystal"
+    },
+    {
+      "item": "sevenstars:frost_powder"
+    },
+    {
+      "item": "sevenstars:frost_powder"
+    },
+    {
+      "item": "minecraft:candle"
+    },
+    {
+      "item": "sevenstars:qi_crystal_shard"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:frost_marrow_candle"
+  }
+}

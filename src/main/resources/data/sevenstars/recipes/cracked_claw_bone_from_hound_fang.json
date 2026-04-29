@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "sevenstars:hound_fang"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:cracked_claw_bone",
+    "count": 2
+  }
+}

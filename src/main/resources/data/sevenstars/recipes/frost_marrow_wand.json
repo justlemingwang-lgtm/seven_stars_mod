@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  M",
+    " Q ",
+    "S  "
+  ],
+  "key": {
+    "M": {
+      "item": "sevenstars:frost_marrow_crystal"
+    },
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "sevenstars:frost_marrow_wand"
+  }
+}

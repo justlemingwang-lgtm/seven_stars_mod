@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "QCQ",
+    "PPP"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    "C": {
+      "item": "minecraft:crafting_table"
+    },
+    "P": {
+      "item": "minecraft:oak_planks"
+    }
+  },
+  "result": {
+    "item": "sevenstars:writing_table"
+  }
+}

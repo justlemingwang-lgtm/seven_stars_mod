@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:wheat"
+    },
+    {
+      "item": "minecraft:wheat"
+    },
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "sevenstars:frost_powder"
+    },
+    {
+      "item": "sevenstars:qi_crystal_shard"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:frost_crystal_cake_slice"
+  }
+}

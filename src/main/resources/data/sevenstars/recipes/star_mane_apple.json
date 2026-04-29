@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:apple"
+    },
+    {
+      "item": "sevenstars:pegasus_mane"
+    },
+    {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    {
+      "item": "minecraft:sugar"
+    }
+  ],
+  "result": {
+    "item": "sevenstars:star_mane_apple"
+  }
+}

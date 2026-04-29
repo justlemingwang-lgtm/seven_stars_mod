@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    "QCQ",
+    " M "
+  ],
+  "key": {
+    "F": {
+      "item": "sevenstars:frost_powder"
+    },
+    "Q": {
+      "item": "sevenstars:qi_crystal_shard"
+    },
+    "C": {
+      "item": "minecraft:compass"
+    },
+    "M": {
+      "item": "sevenstars:frost_marrow_crystal"
+    }
+  },
+  "result": {
+    "item": "sevenstars:ice_dipper_gauge"
+  }
+}
