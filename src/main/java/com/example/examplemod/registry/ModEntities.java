@@ -11,6 +11,8 @@ import com.example.examplemod.entity.GoatHunterButcherEntity;
 import com.example.examplemod.entity.IceDipperProjectileEntity;
 import com.example.examplemod.entity.LightWaveProjectileEntity;
 import com.example.examplemod.entity.StarManePegasusEntity;
+import com.example.examplemod.entity.TormentedWraithEntity;
+import com.example.examplemod.entity.TriangleShardProjectileEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -56,6 +58,13 @@ public class ModEntities {
                     .updateInterval(2)
                     .build("goat_horn_spike_projectile"));
 
+    public static final RegistryObject<EntityType<TriangleShardProjectileEntity>> TRIANGLE_SHARD_PROJECTILE = ENTITIES.register("triangle_shard_projectile",
+            () -> EntityType.Builder.<TriangleShardProjectileEntity>of(TriangleShardProjectileEntity::new, MobCategory.MISC)
+                    .sized(0.22F, 0.22F)
+                    .clientTrackingRange(4)
+                    .updateInterval(2)
+                    .build("triangle_shard_projectile"));
+
     public static final RegistryObject<EntityType<StarManePegasusEntity>> STAR_MANE_PEGASUS = ENTITIES.register("star_mane_pegasus",
             () -> EntityType.Builder.of(StarManePegasusEntity::new, MobCategory.CREATURE)
                     .sized(1.4F, 1.6F)
@@ -85,6 +94,12 @@ public class ModEntities {
                     .sized(0.7F, 2.0F)
                     .clientTrackingRange(8)
                     .build("goat_hunter_butcher"));
+
+    public static final RegistryObject<EntityType<TormentedWraithEntity>> TORMENTED_WRAITH = ENTITIES.register("tormented_wraith",
+            () -> EntityType.Builder.of(TormentedWraithEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 1.9F)
+                    .clientTrackingRange(8)
+                    .build("tormented_wraith"));
 
     public static void register(IEventBus eventBus) {
         ENTITIES.register(eventBus);

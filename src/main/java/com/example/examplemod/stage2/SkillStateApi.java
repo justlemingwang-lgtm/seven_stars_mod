@@ -26,6 +26,9 @@ public final class SkillStateApi {
         if (SkillIds.GOAT_HORN_SPIKES.equals(skillId) && isSkillDisabled(player, SkillIds.GOAT_HORN)) {
             return false;
         }
+        if (SkillIds.SEVEN_SCATTERED_STRIKES.equals(skillId) && isSkillDisabled(player, SkillIds.TRIANGLE)) {
+            return false;
+        }
         return !isSkillDisabled(player, skillId) && !isSkillOnCooldown(player, skillId);
     }
 }

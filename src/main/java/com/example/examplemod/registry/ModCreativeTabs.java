@@ -92,6 +92,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.BLACK_MANE_HOUND_SPAWN_EGG.get());
                 output.accept(ModItems.CULTIST_ECHO_SPAWN_EGG.get());
                 output.accept(ModItems.GOAT_HUNTER_BUTCHER_SPAWN_EGG.get());
+                output.accept(ModItems.TORMENTED_WRAITH_SPAWN_EGG.get());
                 acceptPotionSet(output, ModPotions.QI_SURGE.get());
                 acceptPotionSet(output, ModPotions.STRONG_QI_SURGE.get());
                 acceptPotionSet(output, ModPotions.LONG_QI_SURGE.get());

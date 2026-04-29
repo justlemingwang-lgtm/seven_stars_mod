@@ -6,6 +6,7 @@ import com.example.examplemod.entity.CultistEchoEntity;
 import com.example.examplemod.entity.FrostShellSilverfishEntity;
 import com.example.examplemod.entity.GoatHunterButcherEntity;
 import com.example.examplemod.entity.StarManePegasusEntity;
+import com.example.examplemod.entity.TormentedWraithEntity;
 import com.example.examplemod.registry.ModEntities;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Monster;
@@ -24,6 +25,7 @@ public class ModEntityEvents {
         event.put(ModEntities.BLACK_MANE_HOUND.get(), BlackManeHoundEntity.createAttributes().build());
         event.put(ModEntities.CULTIST_ECHO.get(), CultistEchoEntity.createAttributes().build());
         event.put(ModEntities.GOAT_HUNTER_BUTCHER.get(), GoatHunterButcherEntity.createAttributes().build());
+        event.put(ModEntities.TORMENTED_WRAITH.get(), TormentedWraithEntity.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -34,6 +36,8 @@ public class ModEntityEvents {
         event.register(ModEntities.FROST_SHELL_SILVERFISH.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(ModEntities.BLACK_MANE_HOUND.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
+        event.register(ModEntities.TORMENTED_WRAITH.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
     }
 }

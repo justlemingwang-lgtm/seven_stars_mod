@@ -3,31 +3,30 @@ package com.example.examplemod.skill.impl;
 import com.example.examplemod.registry.ModItems;
 import com.example.examplemod.skill.Skill;
 import com.example.examplemod.skill.SpellScrollRecipes;
+import com.example.examplemod.stage2.SevenScatteredStrikesCaster;
+import com.example.examplemod.stage2.SkillDisableManager;
 import com.example.examplemod.stage2.SkillIds;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public class TriangleSkill implements Skill {
-    private static final int QI_COST = 20;
-    private static final int COOLDOWN_TICKS = 200;
-
     @Override
     public String id() {
-        return SkillIds.TRIANGLE;
+        return SkillIds.SEVEN_SCATTERED_STRIKES;
     }
 
     @Override
     public Component displayName() {
-        return Component.translatable("skill.sevenstars.triangle");
+        return Component.translatable("skill.sevenstars.seven_scattered_strikes");
     }
 
     @Override
     public Component description() {
-        return Component.translatable("skill.sevenstars.triangle.desc");
+        return Component.translatable("skill.sevenstars.seven_scattered_strikes.desc");
     }
 
     @Override
@@ -42,12 +41,12 @@ public class TriangleSkill implements Skill {
 
     @Override
     public int qiCost() {
-        return QI_COST;
+        return com.example.examplemod.stage2.Stage2Constants.SEVEN_SCATTERED_STRIKES_QI_COST;
     }
 
     @Override
     public int cooldownTicks() {
-        return COOLDOWN_TICKS;
+        return com.example.examplemod.stage2.Stage2Constants.SEVEN_SCATTERED_STRIKES_COOLDOWN_TICKS;
     }
 
     @Override
@@ -57,8 +56,20 @@ public class TriangleSkill implements Skill {
 
     @Override
     public boolean cast(ServerPlayer player) {
-        player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0D, player.getZ(), 12, 0.45D, 0.35D, 0.45D, 0.02D);
-        player.displayClientMessage(Component.translatable("message.sevenstars.triangle_placeholder"), true);
+        SevenScatteredStrikesCaster.cast(player);
+        return true;
+    }
+
+    @Override
+    public boolean canCast(ServerPlayer player) {
+        if (!player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.TRIANGLE_ARMOR.get())) {
+            player.displayClientMessage(Component.translatable("message.sevenstars.triangle_need_armor"), true);
+            return false;
+        }
+        if (SkillDisableManager.isSkillDisabled(player, SkillIds.TRIANGLE)) {
+            player.displayClientMessage(Component.translatable("message.sevenstars.triangle_disabled"), true);
+            return false;
+        }
         return true;
     }
 }

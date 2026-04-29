@@ -35,6 +35,7 @@ public class SkillRegistry {
     public static final String GOAT_HORN = "goat_horn";
     public static final String CHOP = "chop";
     public static final String TRIANGLE = "triangle";
+    public static final String SEVEN_SCATTERED_STRIKES = "seven_scattered_strikes";
 
     private static final Map<String, Skill> SKILLS = new LinkedHashMap<>();
 

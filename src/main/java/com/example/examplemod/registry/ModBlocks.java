@@ -3,6 +3,7 @@ package com.example.examplemod.registry;
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.block.PlaceholderStructureBlock;
 import com.example.examplemod.block.GoatHornAltarBlock;
+import com.example.examplemod.block.SoulCalmingLampBlock;
 import com.example.examplemod.block.WritingTableBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -42,7 +43,7 @@ public class ModBlocks {
     public static final RegistryObject<Block> GOAT_HORN_ALTAR = BLOCKS.register("goat_horn_altar",
             () -> new GoatHornAltarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(50.0F, 1200.0F).lightLevel(state -> 4).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> SOUL_CALMING_LAMP = BLOCKS.register("soul_calming_lamp",
-            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0F, 12.0F)));
+            () -> new SoulCalmingLampBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0F, 12.0F).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> TRIANGLE_STONE_BRICKS = BLOCKS.register("triangle_stone_bricks",
             () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(4.5F, 9.0F).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> TRIANGLE_RUNE_TILES = BLOCKS.register("triangle_rune_tiles",

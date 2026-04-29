@@ -62,7 +62,13 @@ public class QiHudOverlay {
                     Component.translatable("hud.sevenstars.skill_unavailable", Component.translatable("skill.sevenstars.goat_horn")));
         }
         y = drawCooldown(graphics, minecraft, screenWidth, y, SkillIds.CHOP, Component.translatable("skill.sevenstars.chop"));
-        drawDisabled(graphics, minecraft, screenWidth, y, SkillIds.TRIANGLE, Component.translatable("skill.sevenstars.triangle"));
+        y = drawDisabled(graphics, minecraft, screenWidth, y, SkillIds.TRIANGLE, Component.translatable("skill.sevenstars.triangle"));
+        int triangleDisabled = ClientSkillStateData.getDisabledTicks(SkillIds.TRIANGLE);
+        if (triangleDisabled > 0) {
+            y = drawLine(graphics, minecraft, screenWidth, y,
+                    Component.translatable("hud.sevenstars.triangle_skill_unavailable", Component.translatable("skill.sevenstars.seven_scattered_strikes")));
+        }
+        drawCooldown(graphics, minecraft, screenWidth, y, SkillIds.SEVEN_SCATTERED_STRIKES, Component.translatable("skill.sevenstars.seven_scattered_strikes"));
     }
 
     private static int drawCooldown(GuiGraphics graphics, Minecraft minecraft, int screenWidth, int y, String skillId, Component name) {

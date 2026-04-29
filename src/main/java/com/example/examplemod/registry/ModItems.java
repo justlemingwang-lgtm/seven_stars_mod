@@ -68,7 +68,7 @@ public class ModItems {
     public static final RegistryObject<Item> TRIANGLE_FRAGMENT = ITEMS.register("triangle_fragment", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> TRIANGLE_CORE = ITEMS.register("triangle_core", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> TRIANGLE_SCROLL = ITEMS.register("triangle_scroll",
-            () -> new SpellScrollItem(SkillRegistry.TRIANGLE, new Item.Properties()));
+            () -> new SpellScrollItem(SkillRegistry.SEVEN_SCATTERED_STRIKES, new Item.Properties()));
     public static final RegistryObject<Item> SOUL_LAMP_WICK = ITEMS.register("soul_lamp_wick", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> GOAT_HORN_SCROLL = ITEMS.register("goat_horn_scroll",
             () -> new SpellScrollItem(SkillRegistry.GOAT_HORN, new Item.Properties()));
@@ -153,6 +153,8 @@ public class ModItems {
             () -> new ForgeSpawnEggItem(ModEntities.CULTIST_ECHO, 0x2A2440, 0x9E79FF, new Item.Properties()));
     public static final RegistryObject<Item> GOAT_HUNTER_BUTCHER_SPAWN_EGG = ITEMS.register("goat_hunter_butcher_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.GOAT_HUNTER_BUTCHER, 0x4A1A1A, 0xD0C0A0, new Item.Properties()));
+    public static final RegistryObject<Item> TORMENTED_WRAITH_SPAWN_EGG = ITEMS.register("tormented_wraith_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.TORMENTED_WRAITH, 0x283044, 0xA7F3FF, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

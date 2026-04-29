@@ -32,7 +32,7 @@ public class SpellScrollRecipes {
                 List.of(new ItemStack(ModItems.SPELL_FRAGMENT.get(), 2), new ItemStack(Items.PAPER, 3), new ItemStack(ModItems.GOAT_HORN_CORE.get(), 1), new ItemStack(ModItems.COMPLETE_GOAT_HORN.get(), 1), new ItemStack(ModItems.STAR_RUNE_SHARD.get(), 2)));
         register(SkillRegistry.CHOP, new ItemStack(ModItems.CHOP_SCROLL.get()), 2, SkillSeries.BASIC, SkillRank.NORMAL,
                 List.of(new ItemStack(ModItems.SPELL_FRAGMENT.get(), 1), new ItemStack(Items.PAPER, 2), new ItemStack(ModItems.DULL_BLADE_FRAGMENT.get(), 2), new ItemStack(ModItems.SHIELDBREAKER_BONE.get(), 1)));
-        register(SkillRegistry.TRIANGLE, new ItemStack(ModItems.TRIANGLE_SCROLL.get()), 2, SkillSeries.BASIC, SkillRank.NORMAL,
+        register(SkillRegistry.SEVEN_SCATTERED_STRIKES, new ItemStack(ModItems.TRIANGLE_SCROLL.get()), 2, SkillSeries.BASIC, SkillRank.NORMAL,
                 List.of(new ItemStack(ModItems.SPELL_FRAGMENT.get(), 2), new ItemStack(Items.PAPER, 3), new ItemStack(ModItems.TRIANGLE_CORE.get(), 1), new ItemStack(ModItems.TRIANGLE_FRAGMENT.get(), 3)));
     }
 

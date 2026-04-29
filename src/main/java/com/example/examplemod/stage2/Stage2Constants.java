@@ -32,6 +32,35 @@ public final class Stage2Constants {
     public static final int BUTCHER_RANGED_DRAIN_QI = 8;
     public static final int BUTCHER_RANGED_SLOW_TICKS = 20;
     public static final float BUTCHER_RANGED_SPEED = 1.25F;
+    public static final int SOUL_LAMP_RADIUS = 7;
+    public static final int SOUL_LAMP_CHECK_INTERVAL = 10;
+    public static final int SOUL_LAMP_LIGHT_LEVEL = 12;
+    public static final int SOUL_LAMP_ACTIVE_TICKS = 400;
+    public static final float WRAITH_HEALTH = 26.0F;
+    public static final float WRAITH_DAMAGE = 4.0F;
+    public static final int WRAITH_MAX_QI = 80;
+    public static final double WRAITH_SPEED = 0.30D;
+    public static final double WRAITH_FOLLOW_RANGE = 24.0D;
+    public static final float WRAITH_UNMANIFESTED_DAMAGE_MULTIPLIER = 0.0F;
+    public static final double WRAITH_MANIFESTED_SPEED_MULTIPLIER = 0.85D;
+    public static final float WRAITH_LIGHTWAVE_DAMAGE_MULTIPLIER = 1.5F;
+    public static final int WRAITH_RANGED_COOLDOWN_MIN_TICKS = 45;
+    public static final int WRAITH_RANGED_COOLDOWN_RANDOM_TICKS = 31;
+    public static final float WRAITH_RANGED_DAMAGE = 3.0F;
+    public static final double WRAITH_RANGED_RANGE = 13.0D;
+    public static final int WRAITH_RANGED_DRAIN_QI = 5;
+    public static final int WRAITH_RANGED_SLOW_TICKS = 25;
+    public static final float WRAITH_RANGED_SPEED = 1.05F;
+    public static final int TRIANGLE_DISABLE_TICKS_BY_LIGHTWAVE = 160;
+    public static final int SEVEN_SCATTERED_STRIKES_QI_COST = 8;
+    public static final int SEVEN_SCATTERED_STRIKES_COOLDOWN_TICKS = 200;
+    public static final int SEVEN_SCATTERED_STRIKES_PROJECTILE_COUNT = 8;
+    public static final float SEVEN_SCATTERED_STRIKES_DAMAGE = 2.5F;
+    public static final int SEVEN_SCATTERED_STRIKES_QI_DAMAGE = 3;
+    public static final double SEVEN_SCATTERED_STRIKES_RANGE = 14.0D;
+    public static final float SEVEN_SCATTERED_STRIKES_SPEED = 1.45F;
+    public static final float SEVEN_SCATTERED_STRIKES_INACCURACY = 0.18F;
+    public static final float SEVEN_SCATTERED_STRIKES_SPREAD_DEGREES = 15.0F;
 
     private Stage2Constants() {
     }

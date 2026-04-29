@@ -5,7 +5,9 @@ import com.example.examplemod.entity.CultistEchoEntity;
 import com.example.examplemod.entity.FrostShellSilverfishEntity;
 import com.example.examplemod.entity.GoatHunterButcherEntity;
 import com.example.examplemod.entity.StarManePegasusEntity;
+import com.example.examplemod.entity.TormentedWraithEntity;
 import net.minecraft.client.model.CowModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.IllagerModel;
 import net.minecraft.client.model.SilverfishModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -75,6 +77,19 @@ public class SimpleMobRenderers {
 
         @Override
         public ResourceLocation getTextureLocation(GoatHunterButcherEntity entity) {
+            return TEXTURE;
+        }
+    }
+
+    public static class WraithRenderer extends MobRenderer<TormentedWraithEntity, HumanoidModel<TormentedWraithEntity>> {
+        private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/zombie/zombie.png");
+
+        public WraithRenderer(EntityRendererProvider.Context context) {
+            super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.45F);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(TormentedWraithEntity entity) {
             return TEXTURE;
         }
     }

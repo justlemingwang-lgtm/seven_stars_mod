@@ -120,6 +120,7 @@ public final class SkillDisableManager {
             case SkillIds.TRIANGLE -> Component.translatable("skill.sevenstars.triangle");
             case SkillIds.GOAT_HORN_SPIKES -> Component.translatable("skill.sevenstars.goat_horn_spikes");
             case SkillIds.CHOP -> Component.translatable("skill.sevenstars.chop");
+            case SkillIds.SEVEN_SCATTERED_STRIKES -> Component.translatable("skill.sevenstars.seven_scattered_strikes");
             default -> Component.literal(skillId);
         };
     }
