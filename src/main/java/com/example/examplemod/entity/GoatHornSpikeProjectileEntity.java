@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -23,6 +24,9 @@ public class GoatHornSpikeProjectileEntity extends ThrowableItemProjectile {
 
     public GoatHornSpikeProjectileEntity(EntityType<? extends GoatHornSpikeProjectileEntity> type, Level level) {
         super(type, level);
+        ItemStack displayStack = new ItemStack(ModItems.COMPLETE_GOAT_HORN.get());
+        displayStack.getOrCreateTag().putInt("CustomModelData", 1);
+        setItem(displayStack);
     }
 
     public void setSkillValues(float damage, double maxRange, int drainQi) {

@@ -2,6 +2,8 @@ package com.example.examplemod.registry;
 
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.entity.BlackManeHoundEntity;
+import com.example.examplemod.entity.AncientCultistEntity;
+import com.example.examplemod.entity.AltarCultistEntity;
 import com.example.examplemod.entity.FrostMobProjectileEntity;
 import com.example.examplemod.entity.FrostShellSilverfishEntity;
 import com.example.examplemod.entity.GoldenFingerProjectileEntity;
@@ -88,6 +90,14 @@ public class ModEntities {
                     .sized(0.6F, 1.95F)
                     .clientTrackingRange(8)
                     .build("cultist_echo"));
+
+    public static final RegistryObject<EntityType<AncientCultistEntity>> ANCIENT_CULTIST = ENTITIES.register("ancient_cultist",
+            () -> EntityType.Builder.of(AncientCultistEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 1.95F).clientTrackingRange(8).build("ancient_cultist"));
+
+    public static final RegistryObject<EntityType<AltarCultistEntity>> ALTAR_CULTIST = ENTITIES.register("altar_cultist",
+            () -> EntityType.Builder.of(AltarCultistEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 1.95F).clientTrackingRange(8).build("altar_cultist"));
 
     public static final RegistryObject<EntityType<GoatHunterButcherEntity>> GOAT_HUNTER_BUTCHER = ENTITIES.register("goat_hunter_butcher",
             () -> EntityType.Builder.of(GoatHunterButcherEntity::new, MobCategory.MONSTER)

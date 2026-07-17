@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"sevenstars:item/pegasus_scroll"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sevenstars:item/triangle_scroll"
+  }
+}

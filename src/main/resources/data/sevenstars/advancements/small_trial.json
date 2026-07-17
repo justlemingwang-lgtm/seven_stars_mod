@@ -1,0 +1,1 @@
+{"parent":"sevenstars:triangle_formed","display":{"icon":{"item":"sevenstars:triangle_armor"},"title":{"translate":"advancement.sevenstars.small_trial"},"description":{"translate":"advancement.sevenstars.stage2_placeholder.desc"},"show_toast":true,"announce_to_chat":true,"hidden":false},"criteria":{"trial":{"trigger":"minecraft:impossible"}}}

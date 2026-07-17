@@ -1,0 +1,1 @@
+{"parent":"sevenstars:star_horn_legend","display":{"icon":{"item":"sevenstars:star_rune_shard"},"title":{"translate":"advancement.sevenstars.swallowed_by_starlight"},"description":{"translate":"advancement.sevenstars.stage2_placeholder.desc"},"show_toast":true,"announce_to_chat":true,"hidden":false},"criteria":{"story":{"trigger":"minecraft:impossible"}}}

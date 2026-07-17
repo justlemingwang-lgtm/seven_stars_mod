@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:chest", "pools": [{ "rolls": 1, "entries": [
+    { "type": "minecraft:item", "name": "minecraft:written_book", "functions": [{ "function": "minecraft:set_nbt", "tag": "{title:\"残缺的封印记录\",author:\"三角石镇研究员\",pages:['{\"text\":\"镇魂灯并非驱散亡魂，而是令其短暂显形。封印核心仍在更深处。\"}']}" }] }
+  ] }]
+}

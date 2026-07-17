@@ -1,1 +1,7 @@
-{"variants":{"":{"model":"sevenstars:block/cleaver_rack"}}}
+{
+  "variants": {
+    "": {
+      "model": "sevenstars:block/cleaver_rack"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "structures": [{ "structure": "sevenstars:triangle_stone_circle", "weight": 1 }],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 44,
+    "separation": 18,
+    "salt": 7120201
+  }
+}

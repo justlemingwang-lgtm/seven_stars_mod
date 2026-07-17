@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:plains",
+    "minecraft:dark_forest",
+    "minecraft:stony_shore",
+    "minecraft:sparse_jungle",
+    "minecraft:windswept_hills"
+  ]
+}

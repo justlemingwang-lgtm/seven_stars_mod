@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":[" H ","SCS","BBB"],"key":{"H":{"item":"sevenstars:complete_goat_horn"},"S":{"item":"sevenstars:star_rune_shard"},"C":{"item":"sevenstars:ancient_cloth"},"B":{"item":"minecraft:stone_bricks"}},"result":{"item":"sevenstars:goat_horn_pedestal"}}

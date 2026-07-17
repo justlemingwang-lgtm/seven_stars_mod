@@ -1,1 +1,6 @@
-{"parent":"minecraft:block/cube_all","textures":{"all":"minecraft:block/spruce_log_top"}}
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "sevenstars:block/chopping_stump"
+  }
+}

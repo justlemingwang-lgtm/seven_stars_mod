@@ -1,4 +1,8 @@
 {
   "type": "minecraft:entity",
-  "pools": []
+  "pools": [
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"sevenstars:soul_lamp_wick"}],"conditions":[{"condition":"minecraft:random_chance","chance":0.35}]},
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"sevenstars:triangle_fragment"}],"conditions":[{"condition":"minecraft:random_chance","chance":0.08}]},
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"sevenstars:star_rune_shard"}],"conditions":[{"condition":"minecraft:random_chance","chance":0.20}]}
+  ]
 }

@@ -1,1 +1,7 @@
-{"variants":{"":{"model":"sevenstars:block/chopping_stump"}}}
+{
+  "variants": {
+    "": {
+      "model": "sevenstars:block/chopping_stump"
+    }
+  }
+}

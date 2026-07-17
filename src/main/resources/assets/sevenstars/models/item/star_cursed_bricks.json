@@ -1,1 +1,3 @@
-{"parent":"sevenstars:block/star_cursed_bricks"}
+{
+  "parent": "sevenstars:block/star_cursed_bricks"
+}

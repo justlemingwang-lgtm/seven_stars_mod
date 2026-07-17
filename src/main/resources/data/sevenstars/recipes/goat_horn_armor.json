@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["HCH","SAS"," Q "],"key":{"H":{"item":"sevenstars:complete_goat_horn"},"C":{"item":"sevenstars:goat_horn_core"},"S":{"item":"sevenstars:star_rune_shard"},"A":{"item":"sevenstars:ancient_cloth"},"Q":{"item":"sevenstars:qi_crystal_shard"}},"result":{"item":"sevenstars:goat_horn_armor"}}

@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":[" F ","BCB"," B "],"key":{"F":{"item":"sevenstars:triangle_fragment"},"C":{"item":"sevenstars:triangle_core"},"B":{"item":"sevenstars:triangle_stone_bricks"}},"result":{"item":"sevenstars:triangle_core_pillar"}}

@@ -3,6 +3,7 @@ package com.example.examplemod.registry;
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.block.PlaceholderStructureBlock;
 import com.example.examplemod.block.GoatHornAltarBlock;
+import com.example.examplemod.block.QiSappingTriangleTileBlock;
 import com.example.examplemod.block.SoulCalmingLampBlock;
 import com.example.examplemod.block.WritingTableBlock;
 import net.minecraft.world.level.block.Block;
@@ -42,12 +43,20 @@ public class ModBlocks {
             () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(6.0F, 12.0F).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> GOAT_HORN_ALTAR = BLOCKS.register("goat_horn_altar",
             () -> new GoatHornAltarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(50.0F, 1200.0F).lightLevel(state -> 4).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> GOAT_HORN_PEDESTAL = BLOCKS.register("goat_horn_pedestal",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(4.5F, 9.0F).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> SOUL_CALMING_LAMP = BLOCKS.register("soul_calming_lamp",
             () -> new SoulCalmingLampBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(4.0F, 12.0F).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> TRIANGLE_STONE_BRICKS = BLOCKS.register("triangle_stone_bricks",
             () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(4.5F, 9.0F).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> TRIANGLE_RUNE_TILES = BLOCKS.register("triangle_rune_tiles",
             () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(4.5F, 9.0F).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> QI_SAPPING_TRIANGLE_TILE = BLOCKS.register("qi_sapping_triangle_tile",
+            () -> new QiSappingTriangleTileBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(4.5F, 9.0F).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> CRACKED_TRIANGLE_STONE_BRICKS = BLOCKS.register("cracked_triangle_stone_bricks",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(4.0F, 8.0F).requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> TRIANGLE_CORE_PILLAR = BLOCKS.register("triangle_core_pillar",
+            () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(5.0F, 10.0F).lightLevel(state -> 3).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> CHOPPING_STUMP = BLOCKS.register("chopping_stump",
             () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 3.0F)));
     public static final RegistryObject<Block> CLEAVER_RACK = BLOCKS.register("cleaver_rack",

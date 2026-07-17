@@ -1,1 +1,7 @@
-{"variants":{"":{"model":"sevenstars:block/star_cursed_bricks"}}}
+{
+  "variants": {
+    "": {
+      "model": "sevenstars:block/star_cursed_bricks"
+    }
+  }
+}

@@ -60,6 +60,10 @@ public class ModItems {
     public static final RegistryObject<Item> GOAT_HORN_CORE = ITEMS.register("goat_horn_core", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> ANCIENT_CLOTH = ITEMS.register("ancient_cloth", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> STAR_RUNE_SHARD = ITEMS.register("star_rune_shard", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ANCIENT_GOAT_PAGE = ITEMS.register("ancient_goat_page", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> TRIANGLE_STONE_CIRCLE_PAGE = ITEMS.register("triangle_stone_circle_page", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> HUNTER_PAGE = ITEMS.register("hunter_page", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> GOAT_HORN_SPIKE_SCROLL_FRAGMENT = ITEMS.register("goat_horn_spike_scroll_fragment", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> BLOODY_CLEAVER = ITEMS.register("bloody_cleaver", () -> new BloodyCleaverItem(Tiers.IRON, 3, -2.8F, new Item.Properties().durability(180)));
     public static final RegistryObject<Item> SHIELDBREAKER_BONE = ITEMS.register("shieldbreaker_bone", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> DULL_BLADE_FRAGMENT = ITEMS.register("dull_blade_fragment", () -> new Item(new Item.Properties()));
@@ -127,12 +131,20 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.STAR_RUNE_TILES.get(), new Item.Properties()));
     public static final RegistryObject<Item> GOAT_HORN_ALTAR = ITEMS.register("goat_horn_altar",
             () -> new BlockItem(ModBlocks.GOAT_HORN_ALTAR.get(), new Item.Properties()));
+    public static final RegistryObject<Item> GOAT_HORN_PEDESTAL = ITEMS.register("goat_horn_pedestal",
+            () -> new BlockItem(ModBlocks.GOAT_HORN_PEDESTAL.get(), new Item.Properties()));
     public static final RegistryObject<Item> SOUL_CALMING_LAMP = ITEMS.register("soul_calming_lamp",
             () -> new BlockItem(ModBlocks.SOUL_CALMING_LAMP.get(), new Item.Properties()));
     public static final RegistryObject<Item> TRIANGLE_STONE_BRICKS = ITEMS.register("triangle_stone_bricks",
             () -> new BlockItem(ModBlocks.TRIANGLE_STONE_BRICKS.get(), new Item.Properties()));
     public static final RegistryObject<Item> TRIANGLE_RUNE_TILES = ITEMS.register("triangle_rune_tiles",
             () -> new BlockItem(ModBlocks.TRIANGLE_RUNE_TILES.get(), new Item.Properties()));
+    public static final RegistryObject<Item> QI_SAPPING_TRIANGLE_TILE = ITEMS.register("qi_sapping_triangle_tile",
+            () -> new BlockItem(ModBlocks.QI_SAPPING_TRIANGLE_TILE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> CRACKED_TRIANGLE_STONE_BRICKS = ITEMS.register("cracked_triangle_stone_bricks",
+            () -> new BlockItem(ModBlocks.CRACKED_TRIANGLE_STONE_BRICKS.get(), new Item.Properties()));
+    public static final RegistryObject<Item> TRIANGLE_CORE_PILLAR = ITEMS.register("triangle_core_pillar",
+            () -> new BlockItem(ModBlocks.TRIANGLE_CORE_PILLAR.get(), new Item.Properties()));
     public static final RegistryObject<Item> CHOPPING_STUMP = ITEMS.register("chopping_stump",
             () -> new BlockItem(ModBlocks.CHOPPING_STUMP.get(), new Item.Properties()));
     public static final RegistryObject<Item> CLEAVER_RACK = ITEMS.register("cleaver_rack",
@@ -151,6 +163,10 @@ public class ModItems {
             () -> new ForgeSpawnEggItem(ModEntities.BLACK_MANE_HOUND, 0x1C1C1C, 0x7A3F2A, new Item.Properties()));
     public static final RegistryObject<Item> CULTIST_ECHO_SPAWN_EGG = ITEMS.register("cultist_echo_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.CULTIST_ECHO, 0x2A2440, 0x9E79FF, new Item.Properties()));
+    public static final RegistryObject<Item> ANCIENT_CULTIST_SPAWN_EGG = ITEMS.register("ancient_cultist_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.ANCIENT_CULTIST, 0x3A3048, 0xB89C62, new Item.Properties()));
+    public static final RegistryObject<Item> ALTAR_CULTIST_SPAWN_EGG = ITEMS.register("altar_cultist_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.ALTAR_CULTIST, 0x241A32, 0xE0B85A, new Item.Properties()));
     public static final RegistryObject<Item> GOAT_HUNTER_BUTCHER_SPAWN_EGG = ITEMS.register("goat_hunter_butcher_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.GOAT_HUNTER_BUTCHER, 0x4A1A1A, 0xD0C0A0, new Item.Properties()));
     public static final RegistryObject<Item> TORMENTED_WRAITH_SPAWN_EGG = ITEMS.register("tormented_wraith_spawn_egg",

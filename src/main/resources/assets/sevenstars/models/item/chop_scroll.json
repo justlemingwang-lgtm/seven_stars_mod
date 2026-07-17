@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"sevenstars:item/hound_claw_scroll"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sevenstars:item/chop_scroll"
+  }
+}

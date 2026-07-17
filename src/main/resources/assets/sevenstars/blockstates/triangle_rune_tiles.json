@@ -1,1 +1,7 @@
-{"variants":{"":{"model":"sevenstars:block/triangle_rune_tiles"}}}
+{
+  "variants": {
+    "": {
+      "model": "sevenstars:block/triangle_rune_tiles"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:block",
+  "pools": [{
+    "rolls": 1,
+    "entries": [{ "type": "minecraft:item", "name": "sevenstars:qi_sapping_triangle_tile" }],
+    "conditions": [{ "condition": "minecraft:survives_explosion" }]
+  }]
+}

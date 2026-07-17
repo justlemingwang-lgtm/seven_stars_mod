@@ -1,1 +1,6 @@
-{"parent":"minecraft:block/cube_all","textures":{"all":"minecraft:block/spruce_planks"}}
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "sevenstars:block/cleaver_rack"
+  }
+}

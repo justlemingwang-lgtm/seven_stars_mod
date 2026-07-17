@@ -1,1 +1,10 @@
-{"variants":{"active=false":{"model":"sevenstars:block/soul_calming_lamp"},"active=true":{"model":"sevenstars:block/soul_calming_lamp"}}}
+{
+  "variants": {
+    "active=false": {
+      "model": "sevenstars:block/soul_calming_lamp"
+    },
+    "active=true": {
+      "model": "sevenstars:block/soul_calming_lamp_active"
+    }
+  }
+}

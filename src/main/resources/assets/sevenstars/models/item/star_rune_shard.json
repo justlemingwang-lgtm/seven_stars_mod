@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"sevenstars:item/star_hoof_fragment"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sevenstars:item/star_rune_shard"
+  }
+}

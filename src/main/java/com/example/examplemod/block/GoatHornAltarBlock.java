@@ -30,13 +30,35 @@ public class GoatHornAltarBlock extends Block implements EntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!stack.is(ModItems.BLOODY_CLEAVER.get())) {
-            return InteractionResult.PASS;
-        }
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        if (!(level.getBlockEntity(pos) instanceof GoatHornAltarBlockEntity altar) || !altar.canSummonEcho()) {
+        if (!(level.getBlockEntity(pos) instanceof GoatHornAltarBlockEntity altar)) {
+            return InteractionResult.PASS;
+        }
+
+        // TODO stage 2 structure flow: replace this creative shortcut with the altar-cultist defeat trigger.
+        if (player.isCreative() && player.isShiftKeyDown()) {
+            altar.debugUnlock();
+            player.displayClientMessage(Component.translatable("message.sevenstars.goat_horn_altar_unlocked"), true);
+            return InteractionResult.CONSUME;
+        }
+
+        if (!stack.is(ModItems.BLOODY_CLEAVER.get())) {
+            if (altar.isAltarUnlocked() && !altar.isHornClaimed()) {
+                giveOrDrop(player, new ItemStack(ModItems.COMPLETE_GOAT_HORN.get()));
+                giveOrDrop(player, new ItemStack(ModItems.GOAT_HORN_CORE.get()));
+                altar.markHornClaimed();
+                player.displayClientMessage(Component.translatable("message.sevenstars.goat_horn_altar_claimed"), true);
+                return InteractionResult.CONSUME;
+            }
+            player.displayClientMessage(Component.translatable(altar.isHornClaimed()
+                    ? "message.sevenstars.goat_horn_altar_claimed_already"
+                    : "message.sevenstars.goat_horn_altar_locked"), true);
+            return InteractionResult.CONSUME;
+        }
+
+        if (!altar.canSummonEcho()) {
             player.displayClientMessage(Component.translatable("message.sevenstars.goat_horn_altar_spent"), true);
             return InteractionResult.CONSUME;
         }
@@ -51,6 +73,10 @@ public class GoatHornAltarBlock extends Block implements EntityBlock {
         serverLevel.playSound(null, pos, SoundEvents.SOUL_ESCAPE, SoundSource.BLOCKS, 1.0F, 0.75F);
         player.displayClientMessage(Component.translatable("message.sevenstars.goat_horn_altar_summon"), true);
         return InteractionResult.CONSUME;
+    }
+
+    private static void giveOrDrop(Player player, ItemStack stack) {
+        if (!player.getInventory().add(stack)) player.drop(stack, false);
     }
 
     @Nullable

@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"sevenstars:item/cracked_claw_bone"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sevenstars:item/shieldbreaker_bone"
+  }
+}

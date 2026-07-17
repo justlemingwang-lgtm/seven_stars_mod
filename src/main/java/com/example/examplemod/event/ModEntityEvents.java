@@ -2,6 +2,8 @@ package com.example.examplemod.event;
 
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.entity.BlackManeHoundEntity;
+import com.example.examplemod.entity.AncientCultistEntity;
+import com.example.examplemod.entity.AltarCultistEntity;
 import com.example.examplemod.entity.CultistEchoEntity;
 import com.example.examplemod.entity.FrostShellSilverfishEntity;
 import com.example.examplemod.entity.GoatHunterButcherEntity;
@@ -24,6 +26,8 @@ public class ModEntityEvents {
         event.put(ModEntities.FROST_SHELL_SILVERFISH.get(), FrostShellSilverfishEntity.createAttributes().build());
         event.put(ModEntities.BLACK_MANE_HOUND.get(), BlackManeHoundEntity.createAttributes().build());
         event.put(ModEntities.CULTIST_ECHO.get(), CultistEchoEntity.createAttributes().build());
+        event.put(ModEntities.ANCIENT_CULTIST.get(), AncientCultistEntity.createAttributes().build());
+        event.put(ModEntities.ALTAR_CULTIST.get(), AltarCultistEntity.createAttributes().build());
         event.put(ModEntities.GOAT_HUNTER_BUTCHER.get(), GoatHunterButcherEntity.createAttributes().build());
         event.put(ModEntities.TORMENTED_WRAITH.get(), TormentedWraithEntity.createAttributes().build());
     }

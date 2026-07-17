@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["FTF","SCS"," Q "],"key":{"F":{"item":"sevenstars:triangle_fragment"},"T":{"item":"sevenstars:triangle_scroll"},"S":{"item":"sevenstars:star_rune_shard"},"C":{"item":"sevenstars:triangle_core"},"Q":{"item":"sevenstars:qi_crystal_shard"}},"result":{"item":"sevenstars:triangle_armor"}}

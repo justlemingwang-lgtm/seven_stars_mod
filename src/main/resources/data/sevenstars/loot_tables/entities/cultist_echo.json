@@ -9,6 +9,8 @@
           "name": "sevenstars:chop_scroll"
         }
       ]
-    }
+    },
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"sevenstars:star_rune_shard"}],"conditions":[{"condition":"minecraft:random_chance","chance":0.5}]},
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"sevenstars:ancient_cloth"}],"conditions":[{"condition":"minecraft:random_chance","chance":0.4}]}
   ]
 }

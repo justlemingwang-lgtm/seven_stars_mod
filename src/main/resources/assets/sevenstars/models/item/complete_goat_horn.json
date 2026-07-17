@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"sevenstars:item/complete_star_hoof"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sevenstars:item/complete_goat_horn"
+  }
+}

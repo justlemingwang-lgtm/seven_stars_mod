@@ -1,1 +1,3 @@
-{"parent":"sevenstars:block/star_rune_tiles"}
+{
+  "parent": "sevenstars:block/star_rune_tiles"
+}

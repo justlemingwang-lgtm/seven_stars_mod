@@ -23,6 +23,8 @@ public class ClientModEvents {
         event.registerEntityRenderer(ModEntities.FROST_SHELL_SILVERFISH.get(), SimpleMobRenderers.FrostSilverfishRenderer::new);
         event.registerEntityRenderer(ModEntities.BLACK_MANE_HOUND.get(), SimpleMobRenderers.HoundRenderer::new);
         event.registerEntityRenderer(ModEntities.CULTIST_ECHO.get(), SimpleMobRenderers.CultistEchoRenderer::new);
+        event.registerEntityRenderer(ModEntities.ANCIENT_CULTIST.get(), SimpleMobRenderers.AncientCultistRenderer::new);
+        event.registerEntityRenderer(ModEntities.ALTAR_CULTIST.get(), SimpleMobRenderers.AltarCultistRenderer::new);
         event.registerEntityRenderer(ModEntities.GOAT_HUNTER_BUTCHER.get(), SimpleMobRenderers.ButcherRenderer::new);
         event.registerEntityRenderer(ModEntities.TORMENTED_WRAITH.get(), SimpleMobRenderers.WraithRenderer::new);
     }

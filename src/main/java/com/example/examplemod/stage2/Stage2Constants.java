@@ -52,6 +52,10 @@ public final class Stage2Constants {
     public static final int WRAITH_RANGED_SLOW_TICKS = 25;
     public static final float WRAITH_RANGED_SPEED = 1.05F;
     public static final int TRIANGLE_DISABLE_TICKS_BY_LIGHTWAVE = 160;
+    public static final int TRIANGLE_TRAP_SLOW_DURATION = 40;
+    public static final int TRIANGLE_TRAP_SLOW_AMPLIFIER = 1;
+    public static final int TRIANGLE_TRAP_QI_DRAIN = 2;
+    public static final int TRIANGLE_TRAP_TRIGGER_COOLDOWN = 20;
     public static final int SEVEN_SCATTERED_STRIKES_QI_COST = 8;
     public static final int SEVEN_SCATTERED_STRIKES_COOLDOWN_TICKS = 200;
     public static final int SEVEN_SCATTERED_STRIKES_PROJECTILE_COUNT = 8;

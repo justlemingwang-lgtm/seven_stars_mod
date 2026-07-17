@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":[" B ","WQW"," T "],"key":{"B":{"item":"sevenstars:soul_lamp_wick"},"Q":{"item":"sevenstars:qi_crystal_shard"},"W":{"item":"sevenstars:triangle_stone_bricks"},"T":{"item":"minecraft:soul_torch"}},"result":{"item":"sevenstars:soul_calming_lamp"}}

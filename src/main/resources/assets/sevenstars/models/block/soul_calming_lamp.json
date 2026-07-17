@@ -1,1 +1,6 @@
-{"parent":"minecraft:block/cube_all","textures":{"all":"sevenstars:block/frost_marrow_candle"}}
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "sevenstars:block/soul_calming_lamp"
+  }
+}

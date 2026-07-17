@@ -1,1 +1,6 @@
-{"parent":"minecraft:block/cube_all","textures":{"all":"sevenstars:item/qicrystal_block"}}
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "sevenstars:block/star_rune_tiles"
+  }
+}

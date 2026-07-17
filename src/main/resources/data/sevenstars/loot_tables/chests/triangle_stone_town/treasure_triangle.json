@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:chest", "pools": [{ "rolls": 2, "entries": [
+    { "type": "minecraft:item", "name": "sevenstars:triangle_fragment", "weight": 6 },
+    { "type": "minecraft:item", "name": "sevenstars:soul_lamp_wick", "weight": 3 },
+    { "type": "minecraft:item", "name": "sevenstars:triangle_core", "weight": 1 }
+  ] }]
+}

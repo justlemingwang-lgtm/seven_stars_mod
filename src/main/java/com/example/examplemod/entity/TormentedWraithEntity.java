@@ -4,7 +4,6 @@ import com.example.examplemod.block.SoulCalmingLampBlock;
 import com.example.examplemod.qi.QiManager;
 import com.example.examplemod.registry.ModBlocks;
 import com.example.examplemod.registry.ModEntities;
-import com.example.examplemod.registry.ModItems;
 import com.example.examplemod.stage2.Stage2Constants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -28,7 +27,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -164,20 +162,6 @@ public class TormentedWraithEntity extends Monster {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setManifested(tag.getBoolean("Manifested"));
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, looting, recentlyHit);
-        if (random.nextFloat() < 0.35F) {
-            spawnAtLocation(new ItemStack(ModItems.SOUL_LAMP_WICK.get(), 1));
-        }
-        if (random.nextFloat() < 0.08F) {
-            spawnAtLocation(new ItemStack(ModItems.TRIANGLE_FRAGMENT.get(), 1));
-        }
-        if (random.nextFloat() < 0.20F) {
-            spawnAtLocation(new ItemStack(ModItems.STAR_RUNE_SHARD.get(), 1));
-        }
     }
 
     @Override

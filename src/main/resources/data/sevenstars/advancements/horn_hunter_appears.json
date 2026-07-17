@@ -1,0 +1,1 @@
+{"parent":"sevenstars:wear_goat_horn","display":{"icon":{"item":"sevenstars:hunter_page"},"title":{"translate":"advancement.sevenstars.horn_hunter_appears"},"description":{"translate":"advancement.sevenstars.stage2_placeholder.desc"},"show_toast":true,"announce_to_chat":true,"hidden":false},"criteria":{"raid_story":{"trigger":"minecraft:impossible"}}}

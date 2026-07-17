@@ -1,0 +1,15 @@
+{
+  "name": "sevenstars:triangle_stone_town/town_square_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "sevenstars:triangle_stone_town/town_square",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}
