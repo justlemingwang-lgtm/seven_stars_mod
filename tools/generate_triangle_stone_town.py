@@ -1,7 +1,7 @@
-"""Generate the checked-in triangle stone town structure templates.
+"""Generate and validate the checked-in triangle stone town structure templates.
 
 The output is vanilla gzip-compressed structure NBT. Keeping the generator in
-the repository makes the 27 large binary templates reviewable and repeatable.
+the repository makes the large binary templates reviewable and repeatable.
 """
 from __future__ import annotations
 
@@ -78,14 +78,16 @@ class Template:
                 self.put(xz - 1, y, z, "sevenstars:triangle_stone_bricks")
 
     def jigsaw(self, x, y, z, facing, name, target="minecraft:empty", pool="minecraft:empty"):
-        # Remove the standard 5 x 4 doorway around the connector.
-        for dy in range(4):
-            for d in range(-2, 3):
-                px, pz = (x + d, z) if facing in ("north", "south") else (x, z + d)
-                self.put(px, y + dy, pz, "minecraft:air")
+        # These connectors are retained as template metadata, but this structure is
+        # assembled by TriangleStoneTownStructure rather than vanilla jigsaw
+        # placement.  Keep the authored wall closed: the generated passage that is
+        # actually selected for the room cuts its own doorway during post-process.
+        # Pre-carving here creates convincing-looking doors with no corridor behind
+        # them whenever a room is randomly positioned or rotated.
         self.put(x, y, z, "minecraft:jigsaw", {"orientation": facing + "_up"}, {
             "id": s("minecraft:jigsaw"), "name": s(name), "target": s(target),
-            "pool": s(pool), "final_state": s("minecraft:air"), "joint": s("aligned")})
+            "pool": s(pool), "final_state": s("sevenstars:triangle_stone_bricks"),
+            "joint": s("aligned")})
 
     def chest(self, x, y, z, table):
         self.put(x, y, z, "minecraft:chest", {"facing": "south", "type": "single", "waterlogged": "false"},
@@ -128,7 +130,7 @@ DIMS = {
     "library": (19,17,8), "brewing_room": (17,15,8), "residential_ruin": (17,15,8),
     "maintenance_workshop": (17,15,8), "corridor_02_turn": (13,13,7), "control_hub": (47,31,9),
     "prison": (21,17,9), "guard_station": (15,13,8), "research_room": (21,19,9),
-    "stairs_down": (9,19,13), "stairs_spiral_down": (13,13,13), "lower_hub": (47,47,11),
+    "stairs_down": (9,19,19), "stairs_spiral_down": (13,13,19), "lower_hub": (47,47,11),
     "treasure_room_01": (21,21,9), "treasure_room_02": (21,21,9), "treasure_room_03": (21,21,9),
     "treasure_room_04": (21,21,9), "observation_gallery": (15,11,8), "sealed_array": (23,23,11),
     "core_vault": (17,17,9), "corridor_chest": (9,17,7), "lamp_shrine_dead_end": (11,11,8),
@@ -167,6 +169,13 @@ VERTICAL_ROOMS = {
     "meditation_cells": (25,23,12),
     "map_room": (27,23,13),
 }
+
+
+def pool_mapping():
+    mapping={"start_pool":["entrance"],"entrance_descent_pool":["entrance_descent"],"tutorial_pool":["tutorial_lamp_room"],"town_square_pool":["town_square"],"corridor_01_pool":["corridor_01_straight"],"living_hub_pool":["living_hub"],"library_pool":["library"],"brewing_pool":["brewing_room"],"residential_pool":["residential_ruin"],"workshop_pool":["maintenance_workshop"],"corridor_02_pool":["corridor_02_turn"],"control_hub_pool":["control_hub"],"prison_pool":["prison"],"guard_pool":["guard_station"],"research_pool":["research_room"],"descent_pool":["stairs_down","stairs_spiral_down"],"lower_hub_pool":["lower_hub"],"treasure_pool":[f"treasure_room_0{n}" for n in range(1,5)],"observation_pool":["observation_gallery"],"sealed_pool":["sealed_array"],"core_vault_pool":["core_vault"],"corridor_chest_pool":["corridor_chest"],"lamp_shrine_pool":["lamp_shrine_dead_end"],"extension_pool":list(MACRO_EXTENSIONS)+list(EXTENSION_VARIANTS),"vertical_access_pool":["vertical_access_corridor"],"vertical_district_pool":["vertical_district"]}
+    for room in VERTICAL_ROOMS:
+        mapping[f"{room}_pool"]=[room]
+    return mapping
 
 
 def entry(t, side="south", y=1, name=None):
@@ -208,34 +217,74 @@ def framed_arch(t, side, offset=0, block="minecraft:polished_deepslate"):
         t.put(px, min(5, y-2), pz, block)
 
 
+def slab_surface(t, x, z, surface_half, headroom=4):
+    """Place a walkable surface measured in half-blocks and solidly support it."""
+    block_y = max(0, (surface_half - 1) // 2)
+    slab_type = "top" if surface_half % 2 == 0 else "bottom"
+    for yy in range(1, block_y):
+        t.put(x, yy, z, "sevenstars:triangle_stone_bricks")
+    t.put(x, block_y, z, "minecraft:deepslate_tile_slab",
+          {"type": slab_type, "waterlogged": "false"})
+    for yy in range(block_y + 1, min(block_y + headroom + 1, t.size[1] - 1)):
+        t.put(x, yy, z, "minecraft:air")
+
+
+def linear_slope_surface(t, x, z, surface_half, next_half, facing):
+    """Use a stair only for a full-block rise; shallow/flat runs use half slabs."""
+    if next_half - surface_half >= 2:
+        block_y = max(0, surface_half // 2)
+        for yy in range(1, block_y):
+            t.put(x, yy, z, "sevenstars:triangle_stone_bricks")
+        t.put(x, block_y, z, "minecraft:deepslate_tile_stairs",
+              {"facing": facing, "half": "bottom", "shape": "straight", "waterlogged": "false"})
+        for yy in range(block_y + 1, min(block_y + 5, t.size[1] - 1)):
+            t.put(x, yy, z, "minecraft:air")
+    else:
+        slab_surface(t, x, z, surface_half)
+
+
+def spiral_surface(t, x, z, standing_y, previous_y, ascent_facing):
+    """Build a conventional spiral tread: oriented stair at each drop, top slab between drops."""
+    if previous_y > standing_y:
+        for yy in range(1, standing_y):
+            t.put(x, yy, z, "sevenstars:triangle_stone_bricks")
+        t.put(x, standing_y, z, "minecraft:deepslate_tile_stairs",
+              {"facing": ascent_facing, "half": "bottom", "shape": "straight", "waterlogged": "false"})
+        for yy in range(standing_y + 1, min(standing_y + 4, t.size[1] - 1)):
+            t.put(x, yy, z, "minecraft:air")
+    else:
+        slab_surface(t, x, z, standing_y * 2, headroom=3)
+
+
 def build_straight_descent(t, high_y, low_y):
-    """Three-wide stair descending from the south high door to north low door."""
+    """Five-wide stair descending from the south high door to north low door."""
     x, _, z = t.size
     cx = x // 2
     run = list(range(1, z-1))
-    levels = {pz: low_y + round((pz-1) * (high_y-low_y) / max(1, z-3)) for pz in run}
-    for pz in run:
-        level = levels[pz]
-        rising_south = pz < z-2 and levels[pz+1] > level
-        step = "minecraft:deepslate_tile_stairs" if rising_south else "minecraft:deepslate_bricks"
-        props = {"facing":"south","half":"bottom","shape":"straight","waterlogged":"false"} if rising_south else None
-        for px in range(cx-1, cx+2):
-            t.put(px, level-1, pz, step, props)
-            for yy in range(1, level-1):
-                t.put(px, yy, pz, "sevenstars:triangle_stone_bricks")
-            for yy in range(level, min(level+3, t.size[1]-1)):
-                t.put(px, yy, pz, "minecraft:air")
-        for px in (cx-2, cx+2):
-            t.put(px, level, pz, "minecraft:deepslate_brick_wall")
+    slope_start, slope_end = 2, z - 3
+    # Lay down both landings first. The slope then owns the transition cells,
+    # so a landing can never overwrite the first/last stair tread.
     floor_rect(t,cx-2,1,cx+2,2,"minecraft:deepslate_bricks",low_y-1)
     floor_rect(t,cx-2,z-3,cx+2,z-2,"minecraft:deepslate_bricks",high_y-1)
+    levels = {
+        pz: low_y * 2 + round(
+            (min(max(pz, slope_start), slope_end) - slope_start)
+            * (high_y-low_y) * 2 / max(1, slope_end-slope_start))
+        for pz in run
+    }
+    for pz in run:
+        surface_half = levels[pz]
+        next_half = levels[min(pz + 1, z - 2)]
+        for px in range(cx-2, cx+3):
+            linear_slope_surface(t, px, pz, surface_half, next_half, "south")
 
 
 def build_spiral_descent(t):
-    """A real 1.5-turn helix, high at the south door and low at the north door."""
+    """A wall-free two-wide 1.5-turn helix with oriented stairs at every drop."""
+    high_y=t.size[1]-4
     for px in range(5,8):
         for pz in range(5,8):
-            column(t,px,pz,1,11)
+            column(t,px,pz,1,t.size[1]-2)
     path=[]
     path += [(px,10) for px in range(6,1,-1)]
     path += [(2,pz) for pz in range(9,1,-1)]
@@ -244,19 +293,26 @@ def build_spiral_descent(t):
     path += [(px,10) for px in range(9,1,-1)]
     path += [(2,pz) for pz in range(9,1,-1)]
     path += [(px,2) for px in range(3,7)]
-    for idx,(px,pz) in enumerate(path):
-        level = 9 - round(idx * 8 / (len(path)-1))
-        prev = path[max(0,idx-1)]
-        dx,dz=prev[0]-px,prev[1]-pz
-        facing = "east" if dx>0 else "west" if dx<0 else "south" if dz>0 else "north"
-        t.put(px,level-1,pz,"minecraft:deepslate_tile_stairs",{"facing":facing,"half":"bottom","shape":"straight","waterlogged":"false"})
-        # Outer guardrail follows the radial side of the helix.
-        ox = 1 if px>6 else -1 if px<6 else 0
-        oz = 1 if pz>6 else -1 if pz<6 else 0
-        if 0 < px+ox < 12 and 0 < pz+oz < 12:
-            t.put(px+ox,level,pz+oz,"minecraft:deepslate_brick_wall")
-    floor_rect(t,4,9,8,11,"minecraft:deepslate_bricks",8)
+    # The south bridge narrows into the outside of the first turn. Keeping its
+    # west edge clear prevents it from flattening the first descending tread.
+    floor_rect(t,4,12,8,t.size[2]-1,"minecraft:deepslate_bricks",high_y-1)
+    floor_rect(t,6,10,8,12,"minecraft:deepslate_bricks",high_y-1)
     floor_rect(t,4,1,8,3,"minecraft:deepslate_bricks",0)
+    for idx,(px,pz) in enumerate(path):
+        standing_y = high_y - round(idx * (high_y-1) / (len(path)-1))
+        previous_y = high_y - round(max(0, idx-1) * (high_y-1) / (len(path)-1))
+        previous = path[max(0,idx-1)]
+        ascent_dx,ascent_dz=previous[0]-px,previous[1]-pz
+        ascent_facing = "east" if ascent_dx>0 else "west" if ascent_dx<0 else "south" if ascent_dz>0 else "north"
+        neighbor = path[min(idx + 1, len(path)-1)] if idx < len(path)-1 else path[idx-1]
+        dx,dz=neighbor[0]-px,neighbor[1]-pz
+        if dx:
+            ox,oz=0,(1 if pz>6 else -1)
+        else:
+            ox,oz=(1 if px>6 else -1),0
+        for sx,sz in {(px,pz),(px+ox,pz+oz)}:
+            if 0 < sx < 12 and 0 < sz < 12:
+                spiral_surface(t,sx,sz,standing_y,previous_y,ascent_facing)
 
 
 def build_low_east_turn(t):
@@ -298,17 +354,12 @@ def extension_variant(base, new_name, continues=True):
 
 
 def build_axis_stair(t, x1, x2, zc, low_y, high_y):
-    """Three-wide west-to-east stair used inside the multi-level crossing."""
+    """Five-wide west-to-east stair used inside the multi-level crossing."""
     for px in range(x1,x2+1):
-        standing=low_y+round((px-x1)*(high_y-low_y)/max(1,x2-x1))
-        next_level=low_y+round((min(px+1,x2)-x1)*(high_y-low_y)/max(1,x2-x1))
-        rising=next_level>standing
-        block="minecraft:deepslate_tile_stairs" if rising else "minecraft:deepslate_bricks"
-        props={"facing":"east","half":"bottom","shape":"straight","waterlogged":"false"} if rising else None
-        for pz in range(zc-1,zc+2):
-            t.put(px,standing-1,pz,block,props)
-            for yy in range(standing,min(standing+4,t.size[1]-1)): t.put(px,yy,pz,"minecraft:air")
-        for pz in (zc-2,zc+2): t.put(px,standing,pz,"minecraft:deepslate_brick_wall")
+        surface_half=low_y*2+round((px-x1)*(high_y-low_y)*2/max(1,x2-x1))
+        next_half=low_y*2+round((min(px+1,x2)-x1)*(high_y-low_y)*2/max(1,x2-x1))
+        for pz in range(zc-2,zc+3):
+            linear_slope_surface(t,px,pz,surface_half,next_half,"east")
 
 
 def macro_extension_templates():
@@ -361,22 +412,36 @@ def macro_extension_templates():
 
 
 def build_grand_helix(t):
-    """Four-level square helix spanning forty blocks of vertical distance."""
+    """Four closed, two-wide flights that land exactly on every district gallery."""
     ring=[]
     ring += [(px,31) for px in range(23,14,-1)]
     ring += [(15,pz) for pz in range(30,14,-1)]
     ring += [(px,15) for px in range(16,32)]
     ring += [(31,pz) for pz in range(16,32)]
     ring += [(px,31) for px in range(30,22,-1)]
-    path=ring+ring[1:]*3
-    for idx,(px,pz) in enumerate(path):
-        standing=41-round(idx*40/(len(path)-1))
-        prev=path[max(0,idx-1)]; dx,dz=prev[0]-px,prev[1]-pz
-        facing="east" if dx>0 else "west" if dx<0 else "south" if dz>0 else "north"
-        t.put(px,standing-1,pz,"minecraft:deepslate_tile_stairs",{"facing":facing,"half":"bottom","shape":"straight","waterlogged":"false"})
-        ox=1 if px>23 else -1 if px<23 else 0; oz=1 if pz>23 else -1 if pz<23 else 0
-        t.put(px+ox,standing,pz+oz,"minecraft:deepslate_brick_wall")
-        for yy in range(standing,min(standing+4,46)): t.put(px,yy,pz,"minecraft:air")
+    landings=(41,37,25,13,1)
+    route=[]
+    for flight,(high_y,low_y) in enumerate(zip(landings,landings[1:])):
+        for idx,(px,pz) in enumerate(ring):
+            if flight > 0 and idx == 0:
+                continue
+            # Reach the target one cell before the end, leaving a flat tread at
+            # the shared gallery coordinate instead of ending on a stair block.
+            progress=min(idx,len(ring)-2)
+            standing_y=high_y-round(progress*(high_y-low_y)/max(1,len(ring)-2))
+            route.append((px,pz,standing_y))
+    for idx,(px,pz,standing_y) in enumerate(route):
+        previous_x,previous_z,previous_y=route[max(0,idx-1)]
+        ascent_dx,ascent_dz=previous_x-px,previous_z-pz
+        ascent_facing="east" if ascent_dx>0 else "west" if ascent_dx<0 else "south" if ascent_dz>0 else "north"
+        neighbor_x,neighbor_z,_neighbor_y=route[min(idx+1,len(route)-1)] if idx<len(route)-1 else route[idx-1]
+        dx,dz=neighbor_x-px,neighbor_z-pz
+        if dx:
+            ox,oz=0,(1 if pz>23 else -1)
+        else:
+            ox,oz=(1 if px>23 else -1),0
+        for sx,sz in {(px,pz),(px+ox,pz+oz)}:
+            spiral_surface(t,sx,sz,standing_y,previous_y,ascent_facing)
     for px in range(20,27):
         for pz in range(20,27): column(t,px,pz,1,44,"sevenstars:triangle_stone_bricks")
 
@@ -446,6 +511,7 @@ def decorate_vertical_room(t):
         for pz in range(7,z-4,4):
             for px in range(4,x-3,4): t.put(px,1,pz,"minecraft:dark_oak_stairs",{"facing":"north","half":"bottom","shape":"straight","waterlogged":"false"})
         t.put(cx,1,4,"minecraft:lectern"); t.put(cx,1,cz,"sevenstars:soul_calming_lamp")
+        t.spawner(cx,1,z-4)
     elif t.name=="collapsed_cistern":
         floor_rect(t,7,7,x-8,z-8,"minecraft:water",1)
         floor_rect(t,cx-1,3,cx+1,z-4,"minecraft:stone_bricks",1)
@@ -678,9 +744,9 @@ def generate_templates():
     t=templates["control_hub"]; entry(t,"south",name="sevenstars:town/control_hub_entry"); exit_to(t,"north","sevenstars:town/prison_entry","prison_pool",offset=-12); exit_to(t,"north","sevenstars:town/guard_entry","guard_pool",offset=12); exit_to(t,"east","sevenstars:town/research_entry","research_pool"); exit_to(t,"west","sevenstars:town/extension_entry","extension_pool")
     for name,key in (("prison","prison"),("guard_station","guard")): entry(templates[name],name=f"sevenstars:town/{key}_entry")
     entry(templates["research_room"],"west",name="sevenstars:town/research_entry")
-    t=templates["stairs_down"]; entry(t,"south",9,"sevenstars:town/descent_entry"); exit_to(t,"east","sevenstars:town/lower_hub_entry","lower_hub_pool",1); build_straight_descent(t,9,1); build_low_east_turn(t)
-    t=templates["stairs_spiral_down"]; entry(t,"south",9,"sevenstars:town/descent_entry"); exit_to(t,"east","sevenstars:town/lower_hub_entry","lower_hub_pool",1); build_spiral_descent(t); build_low_east_turn(t)
-    t=templates["lower_hub"]; entry(t,"west",name="sevenstars:town/lower_hub_entry"); exit_to(t,"west","sevenstars:town/treasure_entry","treasure_pool",offset=-20); exit_to(t,"north","sevenstars:town/observation_entry","observation_pool"); exit_to(t,"east","sevenstars:town/corridor_chest_entry","corridor_chest_pool"); exit_to(t,"south","sevenstars:town/vertical_access_entry","vertical_access_pool"); exit_to(t,"south","sevenstars:town/extension_entry","extension_pool",offset=-20); exit_to(t,"south","sevenstars:town/extension_entry","extension_pool",offset=20)
+    t=templates["stairs_down"]; entry(t,"south",15,"sevenstars:town/descent_entry"); exit_to(t,"east","sevenstars:town/lower_hub_entry","lower_hub_pool",1); build_low_east_turn(t); build_straight_descent(t,15,1)
+    t=templates["stairs_spiral_down"]; entry(t,"south",15,"sevenstars:town/descent_entry"); exit_to(t,"east","sevenstars:town/lower_hub_entry","lower_hub_pool",1); build_low_east_turn(t); build_spiral_descent(t)
+    t=templates["lower_hub"]; entry(t,"west",name="sevenstars:town/lower_hub_entry"); exit_to(t,"west","sevenstars:town/treasure_entry","treasure_pool",offset=-20); exit_to(t,"north","sevenstars:town/corridor_chest_entry","corridor_chest_pool"); exit_to(t,"east","sevenstars:town/observation_entry","observation_pool"); exit_to(t,"south","sevenstars:town/vertical_access_entry","vertical_access_pool"); exit_to(t,"south","sevenstars:town/extension_entry","extension_pool",offset=-20); exit_to(t,"south","sevenstars:town/extension_entry","extension_pool",offset=20)
     for n in range(1,5): entry(templates[f"treasure_room_0{n}"],"east",name="sevenstars:town/treasure_entry")
     t=templates["observation_gallery"]; entry(t,name="sevenstars:town/observation_entry"); exit_to(t,"north","sevenstars:town/sealed_entry","sealed_pool")
     t=templates["sealed_array"]; entry(t,name="sevenstars:town/sealed_entry"); exit_to(t,"north","sevenstars:town/core_vault_entry","core_vault_pool")
@@ -693,6 +759,7 @@ def generate_templates():
     templates.update(extensions)
     templates.update(macro_extension_templates())
     templates.update(vertical_district_templates())
+    validate_connector_graph(templates)
     for t in templates.values():
         if t.name != "entrance":
             air_count = sum(1 for name, _props, _nbt in t.blocks.values() if name == "minecraft:air")
@@ -706,6 +773,36 @@ def generate_templates():
         if t.name in {"corridor_01_straight", "corridor_chest"}:
             orientations={props.get("orientation") for block,props,_nbt in t.blocks.values() if block == "minecraft:jigsaw"}
             assert orientations == {"north_up", "south_up"}, f"{t.name} connectors must follow its long Z axis"
+        if t.name == "ritual_classroom":
+            wraith_spawners=[nbt for block,_props,nbt in t.blocks.values()
+                             if block == "minecraft:spawner"
+                             and nbt["SpawnData"][1]["entity"][1]["id"] == s("sevenstars:tormented_wraith")]
+            assert len(wraith_spawners) == 1, "ritual classroom must contain exactly one tormented wraith spawner"
+        if t.name in {"stairs_spiral_down", "vertical_district"}:
+            stair_facings={props.get("facing") for block,props,_nbt in t.blocks.values()
+                           if block == "minecraft:deepslate_tile_stairs"}
+            assert stair_facings == {"north", "south", "east", "west"}, \
+                f"{t.name} must retain stairs turning through all four directions"
+            assert all(block != "minecraft:deepslate_brick_wall"
+                       for block,_props,_nbt in t.blocks.values()), \
+                f"{t.name} must widen the spiral instead of adding guard walls"
+        if t.name == "stairs_down":
+            assert t.blocks[(t.size[0]//2, 1, 2)][0] == "minecraft:deepslate_tile_stairs", \
+                "straight descent must retain its low-landing connection stair"
+        if t.name == "stairs_spiral_down":
+            assert t.blocks[(4, 14, 10)][0] == "minecraft:deepslate_tile_stairs", \
+                "spiral descent must retain its high-landing connection stair"
+            assert t.blocks[(5, 1, 2)][0] == "minecraft:deepslate_tile_stairs", \
+                "spiral descent must retain its low-landing connection stair"
+        if t.name == "vertical_district":
+            for standing_y in (41,37,25,13,1):
+                block,props,_nbt=t.blocks[(23,standing_y-1,31)]
+                assert block == "minecraft:deepslate_tile_slab" and props.get("type") == "top", \
+                    f"grand helix must meet the gallery landing at standing Y={standing_y}"
+        for block, _props, nbt in t.blocks.values():
+            if block == "minecraft:jigsaw":
+                assert nbt["final_state"] == s("sevenstars:triangle_stone_bricks"), \
+                    f"{t.name} contains a connector that would open without a generated passage"
         t.save()
     return templates
 
@@ -717,19 +814,57 @@ def pool(name, locations):
 
 
 def generate_pools():
-    mapping={"start_pool":["entrance"],"entrance_descent_pool":["entrance_descent"],"tutorial_pool":["tutorial_lamp_room"],"town_square_pool":["town_square"],"corridor_01_pool":["corridor_01_straight"],"living_hub_pool":["living_hub"],"library_pool":["library"],"brewing_pool":["brewing_room"],"residential_pool":["residential_ruin"],"workshop_pool":["maintenance_workshop"],"corridor_02_pool":["corridor_02_turn"],"control_hub_pool":["control_hub"],"prison_pool":["prison"],"guard_pool":["guard_station"],"research_pool":["research_room"],"descent_pool":["stairs_down","stairs_spiral_down"],"lower_hub_pool":["lower_hub"],"treasure_pool":[f"treasure_room_0{n}" for n in range(1,5)],"observation_pool":["observation_gallery"],"sealed_pool":["sealed_array"],"core_vault_pool":["core_vault"],"corridor_chest_pool":["corridor_chest"],"lamp_shrine_pool":["lamp_shrine_dead_end"],"extension_pool":list(MACRO_EXTENSIONS)+list(EXTENSION_VARIANTS),"vertical_access_pool":["vertical_access_corridor"],"vertical_district_pool":["vertical_district"]}
-    for room in VERTICAL_ROOMS:
-        mapping[f"{room}_pool"]=[room]
     POOLS.mkdir(parents=True,exist_ok=True)
-    for name,locations in mapping.items():
+    for name,locations in pool_mapping().items():
         (POOLS/f"{name}.json").write_text(json.dumps(pool(name,locations),indent=2)+"\n",encoding="utf-8")
+
+
+def validate_connector_graph(templates):
+    """Prove that every authored exit has a matching entry and every room is reachable."""
+    mapping=pool_mapping()
+    graph={name:set() for name in templates}
+    prefix="sevenstars:triangle_stone_town/"
+    for name,template in templates.items():
+        for block,_props,nbt in template.blocks.values():
+            if block != "minecraft:jigsaw" or nbt["pool"][1] == "minecraft:empty":
+                continue
+            pool_id=nbt["pool"][1]
+            assert pool_id.startswith(prefix), f"{name} uses foreign connector pool {pool_id}"
+            pool_name=pool_id.removeprefix(prefix)
+            assert pool_name in mapping, f"{name} references missing pool {pool_name}"
+            target=nbt["target"][1]
+            matches=[]
+            for candidate_name in mapping[pool_name]:
+                candidate=templates[candidate_name]
+                if any(candidate_nbt and candidate_nbt["name"][1] == target
+                       for candidate_block,_candidate_props,candidate_nbt in candidate.blocks.values()
+                       if candidate_block == "minecraft:jigsaw"):
+                    matches.append(candidate_name)
+            assert matches, f"{name} exit {target} has no attachable room in {pool_name}"
+            graph[name].update(matches)
+
+    reachable=set()
+    pending=["entrance"]
+    while pending:
+        name=pending.pop()
+        if name in reachable:
+            continue
+        reachable.add(name)
+        pending.extend(graph[name]-reachable)
+    unreachable=set(templates)-reachable
+    assert not unreachable, f"rooms unreachable from entrance: {sorted(unreachable)}"
 
 
 def validate_worldgen_limits():
     path=ROOT/"src/main/resources/data/sevenstars/worldgen/structure/triangle_stone_circle.json"
     config=json.loads(path.read_text(encoding="utf-8"))
-    assert 0 <= config["size"] <= 7, "Minecraft 1.20.1 jigsaw size must be <= 7"
-    assert 1 <= config["max_distance_from_center"] <= 128, "Minecraft 1.20.1 max distance must be <= 128"
+    if config["type"] == "minecraft:jigsaw":
+        assert 0 <= config["size"] <= 7, "Minecraft 1.20.1 jigsaw size must be <= 7"
+        assert 1 <= config["max_distance_from_center"] <= 128, \
+            "Minecraft 1.20.1 max distance must be <= 128"
+    else:
+        assert config["type"] == "sevenstars:triangle_stone_town", \
+            "triangle stone town must use its connectivity-owning structure type"
 
 
 if __name__ == "__main__":

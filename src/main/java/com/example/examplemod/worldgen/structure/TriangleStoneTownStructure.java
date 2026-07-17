@@ -1,31 +1,53 @@
 package com.example.examplemod.worldgen.structure;
 
+import com.example.examplemod.ExampleMod;
 import com.example.examplemod.registry.ModStructures;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 /**
- * A stronghold-style structure graph with a guaranteed core and weighted repeatable wings.
- * Unlike a jigsaw structure, authored rooms are never lost to a seven-level recursion cap.
+ * Connector-driven underground town generation modelled after vanilla strongholds.
+ *
+ * <p>Every room is created from an already placed room's jigsaw connector.  The
+ * two connectors are opened only after the candidate passes collision, range and
+ * build-height checks.  A rejected branch therefore leaves a solid wall instead
+ * of an orphan door, and every accepted room is connected by construction.</p>
  */
 public final class TriangleStoneTownStructure extends Structure {
     public static final Codec<TriangleStoneTownStructure> CODEC = simpleCodec(TriangleStoneTownStructure::new);
 
-    private static final List<WeightedRoom> REPEATABLE_ROOMS = List.of(
+    private static final int MAX_DEPTH = 50;
+    private static final int MAX_DISTANCE_FROM_START = 112;
+    private static final int MAX_BOUND_DISTANCE_FROM_START = 128;
+    private static final int MAX_PIECES = 72;
+    private static final int MAX_LAYOUT_ATTEMPTS = 16;
+    private static final int MIN_COMPLETE_LAYOUT_ROOMS = 24;
+    private static final int CANDIDATE_ATTEMPTS = 5;
+    private static final int TOWN_ENTRY_Y = 10;
+    private static final int TOWN_MAX_Y = 19;
+    private static final int ENTRANCE_SPIRAL_RADIUS = 7;
+
+    private static final List<WeightedRoom> EXTENSION_ROOMS = List.of(
             new WeightedRoom("extension_long_corridor", 40),
             new WeightedRoom("extension_corridor_straight", 30),
             new WeightedRoom("extension_corridor_turn", 20),
@@ -55,340 +77,289 @@ public final class TriangleStoneTownStructure extends Structure {
         int z = context.chunkPos().getMiddleBlockZ();
         int surfaceY = context.chunkGenerator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG,
                 context.heightAccessor(), context.randomState());
+        if (surfaceY <= TOWN_ENTRY_Y + 4) {
+            return Optional.empty();
+        }
         BlockPos anchor = new BlockPos(x, surfaceY, z);
-        return Optional.of(new GenerationStub(anchor,
-                builder -> generateTown(builder, context.structureTemplateManager(), context.random(), anchor,
-                        context.heightAccessor().getMinBuildHeight())));
+        return Optional.of(new GenerationStub(anchor, builder -> generateTown(builder,
+                context.structureTemplateManager(), context.random(), anchor,
+                context.heightAccessor().getMinBuildHeight(), context.heightAccessor().getMaxBuildHeight())));
     }
 
+    /** Vanilla strongholds retry their layout until the portal branch exists; this does the same for the core vault. */
     private static void generateTown(StructurePiecesBuilder builder, StructureTemplateManager templates,
-                                     RandomSource random, BlockPos anchor, int minBuildHeight) {
-        int ox = anchor.getX();
-        int oz = anchor.getZ();
-        int surface = anchor.getY();
-        int mainY = Math.max(minBuildHeight + 68, surface - 42);
-        int lowerY = mainY - 22;
-        int deepY = mainY - 62;
-        int upperGalleryY = mainY + 13;
+                                     RandomSource random, BlockPos anchor, int minBuildHeight, int maxBuildHeight) {
+        List<StructurePiece> bestLayout = List.of();
+        int bestScore = Integer.MIN_VALUE;
 
-        // Compact in X/Z, expansive in Y: every piece remains inside vanilla's eight-chunk reference radius.
-        room(builder, templates, "entrance", ox - 15, surface - 1, oz - 15);
-        room(builder, templates, "entrance_descent", ox - 4, surface - 13, oz - 28);
-        room(builder, templates, "tutorial_lamp_room", ox - 7, mainY, oz - 15);
-        room(builder, templates, "town_square", ox - 15, mainY, oz - 55);
-        room(builder, templates, "corridor_01_straight", ox + 20, mainY, oz - 48,
-                Rotation.CLOCKWISE_90, 1);
-        room(builder, templates, "living_hub", ox + 28, mainY, oz - 55);
-        room(builder, templates, "library", ox + 28, mainY, oz - 103);
-        room(builder, templates, "brewing_room", ox + 50, mainY, oz - 101);
-        room(builder, templates, "residential_ruin", ox + 70, mainY, oz - 101);
-        room(builder, templates, "maintenance_workshop", ox + 90, mainY, oz - 101);
-        room(builder, templates, "corridor_02_turn", ox - 28, mainY, oz - 50);
-        room(builder, templates, "control_hub", ox - 75, mainY, oz - 55);
-        room(builder, templates, "research_room", ox - 108, mainY, oz - 104);
-        room(builder, templates, "prison", ox - 84, mainY, oz - 103);
-        room(builder, templates, "guard_station", ox - 59, mainY, oz - 101);
-
-        room(builder, templates, "stairs_down", ox - 20, mainY - 10, oz - 84);
-        room(builder, templates, "stairs_spiral_down", ox + 14, mainY - 10, oz - 84);
-        room(builder, templates, "lower_hub", ox - 23, lowerY, oz - 58);
-        room(builder, templates, "treasure_room_01", ox - 50, lowerY, oz - 56);
-        room(builder, templates, "treasure_room_02", ox - 50, lowerY, oz - 101);
-        room(builder, templates, "treasure_room_03", ox + 25, lowerY, oz - 56);
-        room(builder, templates, "treasure_room_04", ox + 25, lowerY, oz - 101);
-        room(builder, templates, "observation_gallery", ox + 15, lowerY, oz - 118);
-        room(builder, templates, "sealed_array", ox - 11, lowerY, oz - 88);
-        room(builder, templates, "core_vault", ox - 8, lowerY, oz - 120);
-        room(builder, templates, "corridor_chest", ox + 57, lowerY, oz - 91);
-        room(builder, templates, "lamp_shrine_dead_end", ox + 85, lowerY, oz - 88);
-
-        // The vertical district spans 47 blocks and has rooms opening at eight different elevations.
-        room(builder, templates, "vertical_access_corridor", ox + 40, lowerY, oz - 62);
-        room(builder, templates, "vertical_district", ox + 55, deepY, oz - 75);
-        room(builder, templates, "ossuary", ox + 55, deepY + 1, oz - 100);
-        room(builder, templates, "ritual_classroom", ox + 80, deepY + 13, oz - 102);
-        room(builder, templates, "collapsed_cistern", ox + 25, deepY + 25, oz - 108);
-        room(builder, templates, "wraith_barracks", ox + 103, deepY + 4, oz - 72);
-        room(builder, templates, "archive_annex", ox + 103, deepY + 20, oz - 38);
-        room(builder, templates, "forge_chamber", ox + 70, deepY + 1, oz - 25);
-        room(builder, templates, "meditation_cells", ox + 35, deepY + 18, oz - 25);
-        room(builder, templates, "map_room", ox + 27, deepY + 31, oz - 65);
-
-        // Three authored straight stairs and three spiral stairs are guaranteed.
-        room(builder, templates, "stairs_down", ox - 120, lowerY - 10, oz - 50,
-                Rotation.CLOCKWISE_90, 9);
-        room(builder, templates, "stairs_spiral_down", ox - 120, deepY + 10, oz - 18,
-                Rotation.CLOCKWISE_90, 9);
-        room(builder, templates, "stairs_down", ox + 110, deepY + 7, oz - 112,
-                Rotation.COUNTERCLOCKWISE_90, 9);
-        room(builder, templates, "stairs_spiral_down", ox + 108, deepY + 20, oz - 15,
-                Rotation.CLOCKWISE_180, 9);
-
-        room(builder, templates, "extension_long_corridor", ox - 105, lowerY, oz - 115);
-        room(builder, templates, "extension_crossroads", ox - 105, deepY + 5, oz - 65);
-        room(builder, templates, "extension_vertical_descent", ox - 65, mainY - 18, oz - 118);
-        room(builder, templates, "extension_vertical_ascent", ox - 45, deepY + 2, oz - 95);
-        room(builder, templates, "extension_multilevel_hall", ox - 105, deepY + 22, oz - 25);
-
-        // The extension gallery is above the main floor, keeping the footprint large but place-command safe.
-        String[] gallery = {
-                "extension_library", "extension_brewing", "extension_residential",
-                "extension_workshop", "extension_prison", "extension_guard",
-                "extension_research", "extension_observation", "extension_core_room",
-                "extension_lamp_shrine", "extension_corridor_straight", "extension_corridor_turn"
-        };
-        for (int i = 0; i < gallery.length; i++) {
-            int row = i / 6;
-            int column = i % 6;
-            int x = ox - 112 + column * 40;
-            int z = oz - 118 + row * 32;
-            room(builder, templates, gallery[i], x, upperGalleryY, z,
-                    column % 2 == 0 ? Rotation.NONE : Rotation.CLOCKWISE_180, 10 + i);
-        }
-
-        // Stronghold-like weighted repetition, now constrained to valid vanilla structure-reference cells.
-        generateWeightedWings(builder, templates, random, ox, oz, lowerY, deepY);
-
-        // Passages are last so their explicit AIR volume cuts doorways through every template wall.
-        Map<String, List<TriangleStoneTownPiece>> rooms = indexRooms(builder);
-
-        connect(builder, rooms, "tutorial_lamp_room", "town_square", 1);
-        connect(builder, rooms, "town_square", "corridor_01_straight", 2);
-        connect(builder, rooms, "corridor_01_straight", "living_hub", 2);
-        connect(builder, rooms, "town_square", "corridor_02_turn", 2);
-        connect(builder, rooms, "corridor_02_turn", "control_hub", 2);
-        connect(builder, rooms, "living_hub", "library", 3);
-        connect(builder, rooms, "library", "brewing_room", 3);
-        connect(builder, rooms, "brewing_room", "residential_ruin", 3);
-        connect(builder, rooms, "residential_ruin", "maintenance_workshop", 3);
-        connect(builder, rooms, "control_hub", "guard_station", 3);
-        connect(builder, rooms, "guard_station", "prison", 3);
-        connect(builder, rooms, "prison", "research_room", 3);
-
-        connect(builder, rooms, "lower_hub", "treasure_room_01", 5);
-        connect(builder, rooms, "treasure_room_01", "treasure_room_02", 5);
-        connect(builder, rooms, "lower_hub", "treasure_room_03", 5);
-        connect(builder, rooms, "treasure_room_03", "treasure_room_04", 5);
-        connect(builder, rooms, "lower_hub", "sealed_array", 5);
-        connect(builder, rooms, "sealed_array", "core_vault", 5);
-        connect(builder, rooms, "core_vault", "observation_gallery", 5);
-        connect(builder, rooms, "lower_hub", "corridor_chest", 6);
-        connect(builder, rooms, "corridor_chest", "lamp_shrine_dead_end", 6);
-        connect(builder, rooms, "lower_hub", "vertical_access_corridor", 6);
-        connect(builder, rooms, "vertical_access_corridor", "vertical_district", 6);
-
-        connect(builder, rooms, "vertical_district", "ossuary", 8);
-        connect(builder, rooms, "vertical_district", "ritual_classroom", 8);
-        connect(builder, rooms, "vertical_district", "collapsed_cistern", 8);
-        connect(builder, rooms, "vertical_district", "wraith_barracks", 8);
-        connect(builder, rooms, "vertical_district", "archive_annex", 8);
-        connect(builder, rooms, "vertical_district", "forge_chamber", 8);
-        connect(builder, rooms, "vertical_district", "meditation_cells", 8);
-        connect(builder, rooms, "vertical_district", "map_room", 8);
-
-        for (int i = 0; i < gallery.length - 1; i++) {
-            if (i != 5) {
-                connect(builder, rooms, gallery[i], gallery[i + 1], 10);
+        for (int attempt = 0; attempt < MAX_LAYOUT_ATTEMPTS; attempt++) {
+            builder.clear();
+            LayoutResult result = generateLayout(builder, templates, random, anchor, minBuildHeight, maxBuildHeight);
+            int score = result.roomCount() + (result.hasCoreVault() ? MAX_PIECES : 0);
+            if (score > bestScore) {
+                bestScore = score;
+                bestLayout = new ArrayList<>(builder.build().pieces());
+            }
+            if (result.hasCoreVault() && result.roomCount() >= MIN_COMPLETE_LAYOUT_ROOMS) {
+                return;
             }
         }
-        connect(builder, rooms, gallery[0], gallery[6], 10);
 
-        stairZ(builder, ox, oz - 3, oz - 40, mainY + 1, surface + 1, 1);
-        stairZ(builder, ox, oz - 55, oz - 14, lowerY + 1, mainY + 1, 4);
-        stairX(builder, ox + 25, ox + 78, oz - 10, deepY + 3, lowerY + 1, 7);
-        stairZ(builder, ox + 115, oz - 25, oz - 78, deepY + 3, lowerY + 1, 7);
-        stairZ(builder, ox - 115, oz - 10, oz - 70, mainY + 1, upperGalleryY + 1, 9);
-        hall(builder, ox - 115, oz - 70, ox - 72, oz - 76, mainY + 1, 9);
-        hall(builder, ox - 115, oz - 10, ox - 102, oz - 108, upperGalleryY + 1, 10);
+        // A hostile modded world height or an unusually collision-heavy seed can exhaust retries.
+        // Preserve the best connected attempt; it still cannot contain an isolated room.
+        builder.clear();
+        bestLayout.forEach(builder::addPiece);
     }
 
-    private static void generateWeightedWings(StructurePiecesBuilder builder, StructureTemplateManager templates,
-                                              RandomSource random, int ox, int oz, int lowerY, int deepY) {
-        int[] floors = {deepY, deepY + 14, lowerY, lowerY + 11};
-        int added = 0;
-        for (int attempt = 0; attempt < 36 && added < 10; attempt++) {
-            WeightedRoom chosen = chooseWeighted(random);
-            Rotation rotation = Rotation.values()[random.nextInt(Rotation.values().length)];
-            int x = ox - 105 + random.nextInt(6) * 35;
-            int z = oz - 115 + random.nextInt(4) * 30;
-            int y = floors[random.nextInt(floors.length)];
-            TriangleStoneTownPiece candidate = new TriangleStoneTownPiece(templates, chosen.name(),
-                    new BlockPos(x, y, z), rotation, 20 + added);
-            if (builder.findCollisionPiece(candidate.getBoundingBox()) == null) {
-                builder.addPiece(candidate);
-                added++;
+    private static LayoutResult generateLayout(StructurePiecesBuilder builder, StructureTemplateManager templates,
+                                               RandomSource random, BlockPos anchor,
+                                               int minBuildHeight, int maxBuildHeight) {
+        TriangleStoneTownPiece start = new TriangleStoneTownPiece(templates, "entrance",
+                anchor.offset(-15, -1, -15), Rotation.NONE, 0);
+        builder.addPiece(start);
+
+        BlockPos surfaceDoor = anchor.offset(0, 0, -15);
+        start.openDoor(surfaceDoor, Direction.NORTH);
+
+        BoundingBox spiralBounds = new BoundingBox(
+                anchor.getX() - ENTRANCE_SPIRAL_RADIUS,
+                TOWN_ENTRY_Y - 1,
+                anchor.getZ() - 30,
+                anchor.getX() + ENTRANCE_SPIRAL_RADIUS,
+                anchor.getY() + 3,
+                anchor.getZ() - 16);
+        TriangleStoneTownPassagePiece entranceSpiral = new TriangleStoneTownPassagePiece(
+                spiralBounds, TriangleStoneTownPassagePiece.Mode.ENTRANCE_SPIRAL, 1);
+        builder.addPiece(entranceSpiral);
+
+        TriangleStoneTownPiece townSquare = new TriangleStoneTownPiece(templates, "town_square",
+                new BlockPos(anchor.getX() - 15, TOWN_ENTRY_Y - 1, anchor.getZ() - 61),
+                Rotation.NONE, 2);
+        townSquare.openDoor(new BlockPos(anchor.getX(), TOWN_ENTRY_Y, anchor.getZ() - 31), Direction.SOUTH);
+        builder.addPiece(townSquare);
+
+        List<PendingConnector> pending = collectOutputs(townSquare, 2);
+        boolean hasCoreVault = false;
+        int roomCount = 3;
+        BlockPos layoutCenter = townSquare.getBoundingBox().getCenter();
+        int townBuildCeiling = Math.min(maxBuildHeight, TOWN_MAX_Y + 6);
+
+        // Stronghold pieces are expanded in random pending-child order rather than breadth-first order.
+        while (!pending.isEmpty() && roomCount < MAX_PIECES) {
+            PendingConnector opening = pending.remove(random.nextInt(pending.size()));
+            if (opening.depth() >= MAX_DEPTH) {
+                continue;
             }
+
+            TriangleStoneTownPiece child = attachChild(builder, templates, random, opening,
+                    layoutCenter, minBuildHeight, townBuildCeiling);
+            if (child == null) {
+                // The template connector remains triangle stone bricks when no child can be fitted.
+                continue;
+            }
+
+            builder.addPiece(child);
+            roomCount++;
+            hasCoreVault |= child.assetName().equals("core_vault");
+            pending.addAll(collectOutputs(child, opening.depth() + 1));
+        }
+
+        return new LayoutResult(roomCount, hasCoreVault);
+    }
+
+    private static TriangleStoneTownPiece attachChild(StructurePiecesBuilder builder,
+                                                       StructureTemplateManager templates,
+                                                       RandomSource random, PendingConnector opening,
+                                                       BlockPos startCenter,
+                                                       int minBuildHeight, int maxBuildHeight) {
+        CompoundTag parentNbt = opening.connector().nbt();
+        if (parentNbt == null) {
+            return null;
+        }
+
+        List<WeightedRoom> pool = roomsForPool(parentNbt.getString("pool"));
+        if (pool.isEmpty()) {
+            return null;
+        }
+
+        Direction parentFacing = JigsawBlock.getFrontFacing(opening.connector().state());
+        BlockPos attachmentPosition = opening.connector().pos().relative(parentFacing);
+
+        for (int attempt = 0; attempt < CANDIDATE_ATTEMPTS; attempt++) {
+            WeightedRoom selected = chooseWeighted(pool, random, opening.parent().assetName());
+            Rotation[] rotations = shuffledRotations(random);
+            for (Rotation rotation : rotations) {
+                List<StructureTemplate.StructureBlockInfo> entries = jigsawBlocks(
+                        templates, selected.name(), BlockPos.ZERO, rotation);
+                shuffle(entries, random);
+
+                for (StructureTemplate.StructureBlockInfo entry : entries) {
+                    if (entry.nbt() == null || !JigsawBlock.canAttach(opening.connector(), entry)) {
+                        continue;
+                    }
+
+                    BlockPos templateOrigin = attachmentPosition.subtract(entry.pos());
+                    TriangleStoneTownPiece candidate = TriangleStoneTownPiece.atTemplateOrigin(
+                            templates, selected.name(), templateOrigin, rotation, opening.depth() + 1);
+                    BoundingBox bounds = candidate.getBoundingBox();
+                    if (!insideGenerationLimits(bounds, attachmentPosition, startCenter,
+                            minBuildHeight, maxBuildHeight)
+                            || builder.findCollisionPiece(bounds) != null) {
+                        continue;
+                    }
+
+                    BlockPos childDoor = entry.pos().offset(templateOrigin);
+                    Direction childFacing = JigsawBlock.getFrontFacing(entry.state());
+                    if (!childDoor.equals(attachmentPosition)
+                            || childFacing != parentFacing.getOpposite()) {
+                        continue;
+                    }
+
+                    opening.parent().openDoor(opening.connector().pos(), parentFacing);
+                    candidate.openDoor(childDoor, childFacing);
+                    return candidate;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean insideGenerationLimits(BoundingBox bounds, BlockPos attachment,
+                                                  BlockPos startCenter,
+                                                  int minBuildHeight, int maxBuildHeight) {
+        return bounds.minY() >= minBuildHeight + 5
+                && bounds.maxY() < maxBuildHeight - 5
+                && Math.abs(attachment.getX() - startCenter.getX()) <= MAX_DISTANCE_FROM_START
+                && Math.abs(attachment.getZ() - startCenter.getZ()) <= MAX_DISTANCE_FROM_START
+                && bounds.minX() >= startCenter.getX() - MAX_BOUND_DISTANCE_FROM_START
+                && bounds.maxX() <= startCenter.getX() + MAX_BOUND_DISTANCE_FROM_START
+                && bounds.minZ() >= startCenter.getZ() - MAX_BOUND_DISTANCE_FROM_START
+                && bounds.maxZ() <= startCenter.getZ() + MAX_BOUND_DISTANCE_FROM_START;
+    }
+
+    private static List<PendingConnector> collectOutputs(TriangleStoneTownPiece room, int depth) {
+        List<PendingConnector> outputs = new ArrayList<>();
+        for (StructureTemplate.StructureBlockInfo connector : room.jigsawBlocks()) {
+            CompoundTag nbt = connector.nbt();
+            if (nbt == null || isEmptyId(nbt.getString("pool")) || isEmptyId(nbt.getString("target"))) {
+                continue;
+            }
+            outputs.add(new PendingConnector(room, connector, depth));
+        }
+        return outputs;
+    }
+
+    private static boolean isEmptyId(String id) {
+        return id.isEmpty() || id.equals("minecraft:empty");
+    }
+
+    private static List<StructureTemplate.StructureBlockInfo> jigsawBlocks(StructureTemplateManager templates,
+                                                                           String roomName,
+                                                                           BlockPos origin,
+                                                                           Rotation rotation) {
+        return new ArrayList<>(templates.getOrCreate(TriangleStoneTownPiece.templateId(roomName))
+                .filterBlocks(origin, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true));
+    }
+
+    private static Rotation[] shuffledRotations(RandomSource random) {
+        Rotation[] rotations = Rotation.values().clone();
+        for (int index = rotations.length - 1; index > 0; index--) {
+            int selected = random.nextInt(index + 1);
+            Rotation swap = rotations[index];
+            rotations[index] = rotations[selected];
+            rotations[selected] = swap;
+        }
+        return rotations;
+    }
+
+    private static <T> void shuffle(List<T> values, RandomSource random) {
+        for (int index = values.size() - 1; index > 0; index--) {
+            int selected = random.nextInt(index + 1);
+            T swap = values.get(index);
+            values.set(index, values.get(selected));
+            values.set(selected, swap);
         }
     }
 
-    private static WeightedRoom chooseWeighted(RandomSource random) {
-        int total = REPEATABLE_ROOMS.stream().mapToInt(WeightedRoom::weight).sum();
+    /** Mirrors vanilla's weighted piece selection and avoids immediate repeats when alternatives exist. */
+    private static WeightedRoom chooseWeighted(List<WeightedRoom> rooms, RandomSource random, String previousRoom) {
+        WeightedRoom selected = chooseWeighted(rooms, random);
+        if (rooms.size() > 1 && selected.name().equals(previousRoom)) {
+            for (int retry = 0; retry < 3 && selected.name().equals(previousRoom); retry++) {
+                selected = chooseWeighted(rooms, random);
+            }
+        }
+        return selected;
+    }
+
+    private static WeightedRoom chooseWeighted(List<WeightedRoom> rooms, RandomSource random) {
+        int total = rooms.stream().mapToInt(WeightedRoom::weight).sum();
         int value = random.nextInt(total);
-        for (WeightedRoom room : REPEATABLE_ROOMS) {
+        for (WeightedRoom room : rooms) {
             value -= room.weight();
             if (value < 0) {
                 return room;
             }
         }
-        return REPEATABLE_ROOMS.get(0);
+        return rooms.get(0);
     }
 
-    private static TriangleStoneTownPiece room(StructurePiecesBuilder builder, StructureTemplateManager templates,
-                                               String name, int x, int y, int z) {
-        return room(builder, templates, name, x, y, z, Rotation.NONE, 0);
-    }
-
-    private static TriangleStoneTownPiece room(StructurePiecesBuilder builder, StructureTemplateManager templates,
-                                               String name, int x, int y, int z, Rotation rotation, int depth) {
-        TriangleStoneTownPiece piece = new TriangleStoneTownPiece(templates, name,
-                new BlockPos(x, y, z), rotation, depth);
-        builder.addPiece(piece);
-        return piece;
-    }
-
-    private static Map<String, List<TriangleStoneTownPiece>> indexRooms(StructurePiecesBuilder builder) {
-        Map<String, List<TriangleStoneTownPiece>> rooms = new HashMap<>();
-        for (var piece : builder.build().pieces()) {
-            if (piece instanceof TriangleStoneTownPiece room) {
-                rooms.computeIfAbsent(room.assetName(), ignored -> new ArrayList<>()).add(room);
-            }
+    private static List<WeightedRoom> roomsForPool(String poolName) {
+        ResourceLocation pool = ResourceLocation.tryParse(poolName);
+        if (pool == null || !pool.getNamespace().equals(ExampleMod.MODID)) {
+            return List.of();
         }
-        return rooms;
-    }
-
-    private static void connect(StructurePiecesBuilder builder,
-                                Map<String, List<TriangleStoneTownPiece>> rooms,
-                                String firstName, String secondName, int depth) {
-        List<TriangleStoneTownPiece> first = rooms.get(firstName);
-        List<TriangleStoneTownPiece> second = rooms.get(secondName);
-        if (first == null || first.isEmpty() || second == null || second.isEmpty()) {
-            return;
-        }
-        connect(builder, first.get(0).getBoundingBox(), second.get(0).getBoundingBox(), depth);
-    }
-
-    /** Selects real rotated wall faces, then cuts two blocks into both rooms to guarantee an open doorway. */
-    private static void connect(StructurePiecesBuilder builder, BoundingBox a, BoundingBox b, int depth) {
-        int floorY = Math.max(a.minY(), b.minY()) + 1;
-        int highestUsableFloor = Math.min(a.maxY(), b.maxY()) - 3;
-        if (floorY > highestUsableFloor) {
-            return;
+        String prefix = "triangle_stone_town/";
+        String path = pool.getPath();
+        if (!path.startsWith(prefix)) {
+            return List.of();
         }
 
-        int xGap = axisGap(a.minX(), a.maxX(), b.minX(), b.maxX());
-        int zGap = axisGap(a.minZ(), a.maxZ(), b.minZ(), b.maxZ());
-        int aCenterX = (a.minX() + a.maxX()) / 2;
-        int aCenterZ = (a.minZ() + a.maxZ()) / 2;
-        int bCenterX = (b.minX() + b.maxX()) / 2;
-        int bCenterZ = (b.minZ() + b.maxZ()) / 2;
+        return switch (path.substring(prefix.length())) {
+            case "entrance_descent_pool" -> rooms("entrance_descent");
+            case "tutorial_pool" -> rooms("tutorial_lamp_room");
+            case "town_square_pool" -> rooms("town_square");
+            case "corridor_01_pool" -> rooms("corridor_01_straight");
+            case "living_hub_pool" -> rooms("living_hub");
+            case "library_pool" -> rooms("library");
+            case "brewing_pool" -> rooms("brewing_room");
+            case "residential_pool" -> rooms("residential_ruin");
+            case "workshop_pool" -> rooms("maintenance_workshop");
+            case "corridor_02_pool" -> rooms("corridor_02_turn");
+            case "control_hub_pool" -> rooms("control_hub");
+            case "prison_pool" -> rooms("prison");
+            case "guard_pool" -> rooms("guard_station");
+            case "research_pool" -> rooms("research_room");
+            case "descent_pool" -> rooms("stairs_down", "stairs_spiral_down");
+            case "lower_hub_pool" -> rooms("lower_hub");
+            case "treasure_pool" -> rooms("treasure_room_01", "treasure_room_02",
+                    "treasure_room_03", "treasure_room_04");
+            case "observation_pool" -> rooms("observation_gallery");
+            case "sealed_pool" -> rooms("sealed_array");
+            case "core_vault_pool" -> rooms("core_vault");
+            case "corridor_chest_pool" -> rooms("corridor_chest");
+            case "lamp_shrine_pool" -> rooms("lamp_shrine_dead_end");
+            case "extension_pool" -> EXTENSION_ROOMS;
+            case "vertical_access_pool" -> rooms("vertical_access_corridor");
+            case "vertical_district_pool" -> rooms("vertical_district");
+            case "ossuary_pool" -> rooms("ossuary");
+            case "ritual_classroom_pool" -> rooms("ritual_classroom");
+            case "collapsed_cistern_pool" -> rooms("collapsed_cistern");
+            case "wraith_barracks_pool" -> rooms("wraith_barracks");
+            case "archive_annex_pool" -> rooms("archive_annex");
+            case "forge_chamber_pool" -> rooms("forge_chamber");
+            case "meditation_cells_pool" -> rooms("meditation_cells");
+            case "map_room_pool" -> rooms("map_room");
+            default -> List.of();
+        };
+    }
 
-        if (xGap == 0 && zGap == 0) {
-            hall(builder, aCenterX, aCenterZ, bCenterX, bCenterZ, floorY, depth);
-            return;
+    private static List<WeightedRoom> rooms(String... names) {
+        List<WeightedRoom> rooms = new ArrayList<>(names.length);
+        for (String name : names) {
+            rooms.add(new WeightedRoom(name, 1));
         }
-
-        if (xGap > 0 && (zGap == 0 || xGap >= zGap)) {
-            boolean towardPositiveX = bCenterX > aCenterX;
-            int ax = towardPositiveX ? a.maxX() - 2 : a.minX() + 2;
-            int bx = towardPositiveX ? b.minX() + 2 : b.maxX() - 2;
-            int[] doorZ = facingCoordinates(a.minZ(), a.maxZ(), b.minZ(), b.maxZ(),
-                    aCenterZ, bCenterZ);
-            addHallX(builder, ax, bx, doorZ[0], floorY, depth);
-            addHallZ(builder, bx, doorZ[0], doorZ[1], floorY, depth);
-        } else {
-            boolean towardPositiveZ = bCenterZ > aCenterZ;
-            int az = towardPositiveZ ? a.maxZ() - 2 : a.minZ() + 2;
-            int bz = towardPositiveZ ? b.minZ() + 2 : b.maxZ() - 2;
-            int[] doorX = facingCoordinates(a.minX(), a.maxX(), b.minX(), b.maxX(),
-                    aCenterX, bCenterX);
-            addHallZ(builder, doorX[0], az, bz, floorY, depth);
-            addHallX(builder, doorX[0], doorX[1], bz, floorY, depth);
-        }
-    }
-
-    private static int axisGap(int aMin, int aMax, int bMin, int bMax) {
-        if (aMax < bMin) {
-            return bMin - aMax;
-        }
-        if (bMax < aMin) {
-            return aMin - bMax;
-        }
-        return 0;
-    }
-
-    private static int[] facingCoordinates(int aMin, int aMax, int bMin, int bMax,
-                                           int aCenter, int bCenter) {
-        int aDoorMin = insetMin(aMin, aMax);
-        int aDoorMax = insetMax(aMin, aMax);
-        int bDoorMin = insetMin(bMin, bMax);
-        int bDoorMax = insetMax(bMin, bMax);
-        int overlapMin = Math.max(aDoorMin, bDoorMin);
-        int overlapMax = Math.min(aDoorMax, bDoorMax);
-        if (overlapMin <= overlapMax) {
-            int shared = (overlapMin + overlapMax) / 2;
-            return new int[]{shared, shared};
-        }
-        return new int[]{clamp(bCenter, aDoorMin, aDoorMax), clamp(aCenter, bDoorMin, bDoorMax)};
-    }
-
-    private static int insetMin(int min, int max) {
-        return min + Math.min(3, Math.max(1, (max - min) / 2));
-    }
-
-    private static int insetMax(int min, int max) {
-        return max - Math.min(3, Math.max(1, (max - min) / 2));
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    private static void addHallX(StructurePiecesBuilder builder, int x1, int x2, int z,
-                                 int floorY, int depth) {
-        if (x1 == x2) {
-            return;
-        }
-        builder.addPiece(new TriangleStoneTownPassagePiece(new BoundingBox(
-                Math.min(x1, x2), floorY - 1, z - 3,
-                Math.max(x1, x2), floorY + 5, z + 3),
-                TriangleStoneTownPassagePiece.Mode.HALL_X, depth));
-    }
-
-    private static void addHallZ(StructurePiecesBuilder builder, int x, int z1, int z2,
-                                 int floorY, int depth) {
-        if (z1 == z2) {
-            return;
-        }
-        builder.addPiece(new TriangleStoneTownPassagePiece(new BoundingBox(
-                x - 3, floorY - 1, Math.min(z1, z2),
-                x + 3, floorY + 5, Math.max(z1, z2)),
-                TriangleStoneTownPassagePiece.Mode.HALL_Z, depth));
-    }
-
-    private static void hall(StructurePiecesBuilder builder, int x1, int z1, int x2, int z2,
-                             int floorY, int depth) {
-        addHallX(builder, x1, x2, z1, floorY, depth);
-        addHallZ(builder, x2, z1, z2, floorY, depth);
-    }
-
-    private static void stairZ(StructurePiecesBuilder builder, int x, int highZ, int lowZ,
-                               int lowFloorY, int highFloorY, int depth) {
-        TriangleStoneTownPassagePiece.Mode mode = lowZ > highZ
-                ? TriangleStoneTownPassagePiece.Mode.STAIR_Z_POSITIVE_DOWN
-                : TriangleStoneTownPassagePiece.Mode.STAIR_Z_NEGATIVE_DOWN;
-        builder.addPiece(new TriangleStoneTownPassagePiece(new BoundingBox(
-                x - 4, lowFloorY - 2, Math.min(highZ, lowZ),
-                x + 4, highFloorY + 4, Math.max(highZ, lowZ)), mode, depth));
-    }
-
-    private static void stairX(StructurePiecesBuilder builder, int highX, int lowX, int z,
-                               int lowFloorY, int highFloorY, int depth) {
-        TriangleStoneTownPassagePiece.Mode mode = lowX > highX
-                ? TriangleStoneTownPassagePiece.Mode.STAIR_X_POSITIVE_DOWN
-                : TriangleStoneTownPassagePiece.Mode.STAIR_X_NEGATIVE_DOWN;
-        builder.addPiece(new TriangleStoneTownPassagePiece(new BoundingBox(
-                Math.min(highX, lowX), lowFloorY - 2, z - 4,
-                Math.max(highX, lowX), highFloorY + 4, z + 4), mode, depth));
+        return List.copyOf(rooms);
     }
 
     @Override
@@ -397,5 +368,13 @@ public final class TriangleStoneTownStructure extends Structure {
     }
 
     private record WeightedRoom(String name, int weight) {
+    }
+
+    private record PendingConnector(TriangleStoneTownPiece parent,
+                                    StructureTemplate.StructureBlockInfo connector,
+                                    int depth) {
+    }
+
+    private record LayoutResult(int roomCount, boolean hasCoreVault) {
     }
 }
