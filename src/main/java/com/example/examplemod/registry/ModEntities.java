@@ -15,6 +15,7 @@ import com.example.examplemod.entity.LightWaveProjectileEntity;
 import com.example.examplemod.entity.StarManePegasusEntity;
 import com.example.examplemod.entity.TormentedWraithEntity;
 import com.example.examplemod.entity.TriangleShardProjectileEntity;
+import com.example.examplemod.entity.AzureDragonEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -110,6 +111,14 @@ public class ModEntities {
                     .sized(0.6F, 1.9F)
                     .clientTrackingRange(8)
                     .build("tormented_wraith"));
+
+    public static final RegistryObject<EntityType<AzureDragonEntity>> AZURE_DRAGON = ENTITIES.register("azure_dragon",
+            () -> EntityType.Builder.of(AzureDragonEntity::new, MobCategory.MONSTER)
+                    .sized(4.6F, 4.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(2)
+                    .fireImmune()
+                    .build("azure_dragon"));
 
     public static void register(IEventBus eventBus) {
         ENTITIES.register(eventBus);

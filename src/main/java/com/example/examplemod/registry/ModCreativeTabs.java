@@ -22,6 +22,12 @@ public class ModCreativeTabs {
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.ABSORBER.get());
                 output.accept(ModItems.CONSUMER.get());
+                output.accept(ModItems.SEVEN_STARS_CODEX.get());
+                output.accept(ModItems.AZURE_DRAGON_SCALE.get());
+                output.accept(ModItems.LOST_STAR_MAGIC_TOKEN.get());
+                output.accept(ModItems.AZURE_SEAL_CHAIN.get());
+                output.accept(ModItems.AZURE_SOUL_CONTAINER.get());
+                output.accept(ModItems.AZURE_BUTCHER_SPAWN_RUNE.get());
                 output.accept(ModItems.SPELL_FRAGMENT.get());
                 output.accept(ModItems.QI_CRYSTAL_SHARD.get());
                 output.accept(ModItems.QI_CRYSTAL_CANDY.get());

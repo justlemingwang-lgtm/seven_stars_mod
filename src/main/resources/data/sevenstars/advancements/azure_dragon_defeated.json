@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": { "item": "sevenstars:lost_star_magic_token" },
+    "title": { "translate": "advancement.sevenstars.azure_dragon_defeated" },
+    "description": { "translate": "advancement.sevenstars.azure_dragon_defeated.desc" },
+    "background": "minecraft:textures/gui/advancements/backgrounds/end.png",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "token": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [{ "items": ["sevenstars:lost_star_magic_token"] }] }
+    }
+  }
+}

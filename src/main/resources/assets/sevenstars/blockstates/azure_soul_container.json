@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "active=false,summoned=false": { "model": "sevenstars:block/azure_soul_container" },
+    "active=true,summoned=false": { "model": "sevenstars:block/azure_soul_container_active" },
+    "active=false,summoned=true": { "model": "sevenstars:block/azure_soul_container_summoned" },
+    "active=true,summoned=true": { "model": "sevenstars:block/azure_soul_container_summoned" }
+  }
+}

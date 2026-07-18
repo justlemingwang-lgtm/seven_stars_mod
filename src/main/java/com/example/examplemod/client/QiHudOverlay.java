@@ -50,6 +50,11 @@ public class QiHudOverlay {
                     screenWidth / 2 + 12, screenHeight / 2 + 12, 0xFFDD66, true);
         }
         renderSkillStates(graphics, minecraft, screenWidth, screenHeight);
+        if (ClientArmorDisableData.getRemainingTicks() > 0) {
+            Component disabled = Component.translatable("hud.sevenstars.armor_disabled",
+                    formatSeconds(ClientArmorDisableData.getRemainingTicks()));
+            graphics.drawCenteredString(minecraft.font, disabled, screenWidth / 2, screenHeight - 82, 0xFF5544);
+        }
     }
 
     private static void renderSkillStates(GuiGraphics graphics, Minecraft minecraft, int screenWidth, int screenHeight) {

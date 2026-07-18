@@ -2,6 +2,7 @@ package com.example.examplemod.registry;
 
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.item.AbsorberItem;
+import com.example.examplemod.item.AzureDragonScaleItem;
 import com.example.examplemod.item.BloodyCleaverItem;
 import com.example.examplemod.item.ConsumerItem;
 import com.example.examplemod.item.CooldownChestplateItem;
@@ -11,6 +12,7 @@ import com.example.examplemod.item.GoatHornArmorItem;
 import com.example.examplemod.item.QiFoodItem;
 import com.example.examplemod.item.QiHelmetItem;
 import com.example.examplemod.item.SevenStarScrollItem;
+import com.example.examplemod.item.SevenStarsCodexItem;
 import com.example.examplemod.item.StarHoofSpearItem;
 import com.example.examplemod.item.StarReinBellItem;
 import com.example.examplemod.item.SpellScrollItem;
@@ -19,6 +21,7 @@ import com.example.examplemod.item.TriangleArmorItem;
 import com.example.examplemod.skill.SkillRegistry;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -38,6 +41,12 @@ public class ModItems {
             () -> new SpellFragmentItem(new Item.Properties()));
     public static final RegistryObject<Item> SEVEN_STAR_SCROLL = ITEMS.register("seven_star_scroll",
             () -> new SevenStarScrollItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SEVEN_STARS_CODEX = ITEMS.register("seven_stars_codex",
+            () -> new SevenStarsCodexItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> AZURE_DRAGON_SCALE = ITEMS.register("azure_dragon_scale",
+            () -> new AzureDragonScaleItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> LOST_STAR_MAGIC_TOKEN = ITEMS.register("lost_star_magic_token",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> QI_HELMET = ITEMS.register("qi_helmet",
             () -> new QiHelmetItem(new Item.Properties()));
     public static final RegistryObject<Item> COOLDOWN_CHESTPLATE = ITEMS.register("cooldown_chestplate",
@@ -155,6 +164,12 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.FROZEN_OBSERVATORY.get(), new Item.Properties()));
     public static final RegistryObject<Item> ABANDONED_KENNEL = ITEMS.register("abandoned_kennel",
             () -> new BlockItem(ModBlocks.ABANDONED_KENNEL.get(), new Item.Properties()));
+    public static final RegistryObject<Item> AZURE_SEAL_CHAIN = ITEMS.register("azure_seal_chain",
+            () -> new BlockItem(ModBlocks.AZURE_SEAL_CHAIN.get(), new Item.Properties()));
+    public static final RegistryObject<Item> AZURE_SOUL_CONTAINER = ITEMS.register("azure_soul_container",
+            () -> new BlockItem(ModBlocks.AZURE_SOUL_CONTAINER.get(), new Item.Properties()));
+    public static final RegistryObject<Item> AZURE_BUTCHER_SPAWN_RUNE = ITEMS.register("azure_butcher_spawn_rune",
+            () -> new BlockItem(ModBlocks.AZURE_BUTCHER_SPAWN_RUNE.get(), new Item.Properties()));
     public static final RegistryObject<Item> STAR_MANE_PEGASUS_SPAWN_EGG = ITEMS.register("star_mane_pegasus_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.STAR_MANE_PEGASUS, 0xD8C47A, 0x74D8FF, new Item.Properties()));
     public static final RegistryObject<Item> FROST_SHELL_SILVERFISH_SPAWN_EGG = ITEMS.register("frost_shell_silverfish_spawn_egg",

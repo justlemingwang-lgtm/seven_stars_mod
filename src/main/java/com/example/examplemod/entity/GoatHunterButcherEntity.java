@@ -6,6 +6,8 @@ import com.example.examplemod.stage2.Stage2Constants;
 import com.example.examplemod.registry.ModEntities;
 import com.example.examplemod.registry.ModItems;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -26,12 +28,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import java.util.UUID;
 
 public class GoatHunterButcherEntity extends AbstractIllager {
     private int chopWindup;
     private int chopCooldown;
     private int rangedCooldown;
     private LivingEntity chopTarget;
+    private boolean summonedByAzureDragon;
+    private UUID summoningDragon;
+    private BlockPos azureArenaCenter = BlockPos.ZERO;
 
     public GoatHunterButcherEntity(EntityType<? extends GoatHunterButcherEntity> type, Level level) {
         super(type, level);
@@ -78,6 +84,10 @@ public class GoatHunterButcherEntity extends AbstractIllager {
         super.aiStep();
         if (level().isClientSide()) {
             return;
+        }
+        if (summonedByAzureDragon && position().distanceToSqr(Vec3.atCenterOf(azureArenaCenter)) > 48.0D * 48.0D) {
+            getNavigation().stop();
+            teleportTo(azureArenaCenter.getX() + 0.5D, azureArenaCenter.getY() + 1.0D, azureArenaCenter.getZ() + 0.5D);
         }
         if (chopCooldown > 0) {
             chopCooldown--;
@@ -160,5 +170,39 @@ public class GoatHunterButcherEntity extends AbstractIllager {
                 && hasLineOfSight(target)
                 && distanceToSqr(target) <= range * range
                 && !ChopSkillLogic.findTargetsInCone(level(), this, range, Stage2Constants.CHOP_HALF_ANGLE_DEGREES).isEmpty();
+    }
+
+    public void markSummonedByAzureDragon(UUID dragonUuid, BlockPos arenaCenter) {
+        summonedByAzureDragon = true;
+        summoningDragon = dragonUuid;
+        azureArenaCenter = arenaCenter.immutable();
+        setPersistenceRequired();
+    }
+
+    public boolean isSummonedByAzureDragon(UUID dragonUuid) {
+        return summonedByAzureDragon && dragonUuid.equals(summoningDragon);
+    }
+
+    @Override
+    protected boolean shouldDropLoot() {
+        return !summonedByAzureDragon && super.shouldDropLoot();
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("SummonedByAzureDragon", summonedByAzureDragon);
+        if (summoningDragon != null) tag.putUUID("SummoningDragon", summoningDragon);
+        tag.putInt("AzureArenaX", azureArenaCenter.getX());
+        tag.putInt("AzureArenaY", azureArenaCenter.getY());
+        tag.putInt("AzureArenaZ", azureArenaCenter.getZ());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        summonedByAzureDragon = tag.getBoolean("SummonedByAzureDragon");
+        summoningDragon = tag.hasUUID("SummoningDragon") ? tag.getUUID("SummoningDragon") : null;
+        azureArenaCenter = new BlockPos(tag.getInt("AzureArenaX"), tag.getInt("AzureArenaY"), tag.getInt("AzureArenaZ"));
     }
 }

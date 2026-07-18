@@ -1,0 +1,5 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": { "cross": "minecraft:block/chain", "particle": "minecraft:block/chain" },
+  "render_type": "cutout"
+}

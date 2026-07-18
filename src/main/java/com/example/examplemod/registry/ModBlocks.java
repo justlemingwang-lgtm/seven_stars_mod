@@ -6,6 +6,9 @@ import com.example.examplemod.block.GoatHornAltarBlock;
 import com.example.examplemod.block.QiSappingTriangleTileBlock;
 import com.example.examplemod.block.SoulCalmingLampBlock;
 import com.example.examplemod.block.WritingTableBlock;
+import com.example.examplemod.block.AzureSealChainBlock;
+import com.example.examplemod.block.AzureSoulContainerBlock;
+import com.example.examplemod.block.AzureButcherSpawnRuneBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -67,6 +70,15 @@ public class ModBlocks {
             () -> new PlaceholderStructureBlock(PlaceholderStructureBlock.Kind.OBSERVATORY, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)));
     public static final RegistryObject<Block> ABANDONED_KENNEL = BLOCKS.register("abandoned_kennel",
             () -> new PlaceholderStructureBlock(PlaceholderStructureBlock.Kind.KENNEL, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)));
+    public static final RegistryObject<Block> AZURE_SEAL_CHAIN = BLOCKS.register("azure_seal_chain",
+            () -> new AzureSealChainBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(-1.0F, 3600000.0F).noOcclusion().lightLevel(state -> state.getValue(AzureSealChainBlock.BROKEN) ? 2 : 7)));
+    public static final RegistryObject<Block> AZURE_SOUL_CONTAINER = BLOCKS.register("azure_soul_container",
+            () -> new AzureSoulContainerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE)
+                    .strength(-1.0F, 3600000.0F).lightLevel(state -> 12)));
+    public static final RegistryObject<Block> AZURE_BUTCHER_SPAWN_RUNE = BLOCKS.register("azure_butcher_spawn_rune",
+            () -> new AzureButcherSpawnRuneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN)
+                    .strength(4.0F, 12.0F).lightLevel(state -> 6).requiresCorrectToolForDrops()));
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);

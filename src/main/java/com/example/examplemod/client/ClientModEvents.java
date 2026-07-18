@@ -2,6 +2,8 @@ package com.example.examplemod.client;
 
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.client.renderer.SimpleMobRenderers;
+import com.example.examplemod.client.renderer.AzureDragonRenderer;
+import com.example.examplemod.client.model.AzureDragonModel;
 import com.example.examplemod.registry.ModEntities;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -27,5 +29,11 @@ public class ClientModEvents {
         event.registerEntityRenderer(ModEntities.ALTAR_CULTIST.get(), SimpleMobRenderers.AltarCultistRenderer::new);
         event.registerEntityRenderer(ModEntities.GOAT_HUNTER_BUTCHER.get(), SimpleMobRenderers.ButcherRenderer::new);
         event.registerEntityRenderer(ModEntities.TORMENTED_WRAITH.get(), SimpleMobRenderers.WraithRenderer::new);
+        event.registerEntityRenderer(ModEntities.AZURE_DRAGON.get(), AzureDragonRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(AzureDragonModel.LAYER, AzureDragonModel::createBodyLayer);
     }
 }

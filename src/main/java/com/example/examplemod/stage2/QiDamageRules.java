@@ -4,6 +4,7 @@ import com.example.examplemod.registry.ModItems;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import com.example.examplemod.stage3.ArmorDisableManager;
 
 public final class QiDamageRules {
     private QiDamageRules() {
@@ -13,6 +14,7 @@ public final class QiDamageRules {
         return !player.isCreative()
                 && !player.isSpectator()
                 && player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.GOAT_HORN_ARMOR.get())
+                && !ArmorDisableManager.isArmorDisabled(player)
                 && !SkillDisableManager.isSkillDisabled(player, SkillIds.GOAT_HORN);
     }
 

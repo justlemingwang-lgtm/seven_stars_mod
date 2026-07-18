@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "broken=false": { "model": "sevenstars:block/azure_seal_chain" },
+    "broken=true": { "model": "sevenstars:block/azure_seal_chain_broken" }
+  }
+}

@@ -3,6 +3,7 @@ package com.example.examplemod.network;
 import com.example.examplemod.ExampleMod;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ModNetwork {
@@ -66,6 +67,21 @@ public class ModNetwork {
                 .encoder(SyncSkillStatePacket::encode)
                 .decoder(SyncSkillStatePacket::decode)
                 .consumerMainThread(SyncSkillStatePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncCodexProgressPacket.class, nextId())
+                .encoder(SyncCodexProgressPacket::encode)
+                .decoder(SyncCodexProgressPacket::decode)
+                .consumerMainThread(SyncCodexProgressPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(SyncArmorDisablePacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncArmorDisablePacket::encode)
+                .decoder(SyncArmorDisablePacket::decode)
+                .consumerMainThread(SyncArmorDisablePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(QinglongIllusionPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(QinglongIllusionPacket::encode)
+                .decoder(QinglongIllusionPacket::decode)
+                .consumerMainThread(QinglongIllusionPacket::handle)
                 .add();
     }
 

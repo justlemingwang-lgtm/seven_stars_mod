@@ -1,0 +1,70 @@
+package com.example.examplemod.stage3;
+
+public final class Stage3Constants {
+    public static final double AZURE_DRAGON_MAX_HEALTH = 600.0D;
+    public static final double AZURE_DRAGON_ARMOR = 18.0D;
+    public static final double AZURE_DRAGON_ATTACK_DAMAGE = 14.0D;
+    public static final double AZURE_DRAGON_MOVEMENT_SPEED = 0.28D;
+    public static final double AZURE_DRAGON_FOLLOW_RANGE = 64.0D;
+    public static final double AZURE_DRAGON_KNOCKBACK_RESISTANCE = 0.9D;
+    public static final double ARENA_RADIUS = 48.0D;
+    public static final double ARENA_VERTICAL_RANGE = 24.0D;
+    public static final int PHASE_TRANSITION_TICKS = 80;
+    public static final int ATTACK_INTERVAL_TICKS = 35;
+    public static final int ATTACK_INTERVAL_MIN_TICKS = 22;
+    public static final int ATTACK_INTERVAL_MAX_TICKS = 46;
+    public static final int PHYSICAL_BREATH_WINDUP = 25;
+    public static final int PHYSICAL_BREATH_ACTIVE = 10;
+    public static final int PHYSICAL_BREATH_RECOVERY = 20;
+    public static final float PHYSICAL_BREATH_DAMAGE = 10.0F;
+    public static final double PHYSICAL_BREATH_RANGE = 14.0D;
+    public static final double PHYSICAL_BREATH_HALF_ANGLE = 32.0D;
+    public static final int STOMP_WINDUP = 30;
+    public static final int STOMP_RECOVERY = 22;
+    public static final float STOMP_DAMAGE = 13.0F;
+    public static final double STOMP_RADIUS = 6.0D;
+    public static final int TURNING_TAIL_WINDUP = 22;
+    public static final int TURNING_TAIL_RECOVERY = 18;
+    public static final float TURNING_TAIL_DAMAGE = 12.0F;
+    public static final double TURNING_TAIL_RANGE = 9.0D;
+    public static final int AZURE_BREATH_WINDUP = 36;
+    public static final int AZURE_BREATH_ACTIVE = 24;
+    public static final int AZURE_BREATH_RECOVERY = 24;
+    public static final float AZURE_BREATH_DAMAGE = 9.0F;
+    public static final double AZURE_BREATH_RANGE = 18.0D;
+    public static final double AZURE_BREATH_HALF_ANGLE = 26.0D;
+    public static final int AZURE_BREATH_PULSE_INTERVAL = 6;
+    public static final int AZURE_TRIANGLE_DISABLE_TICKS = 240;
+    public static final int DIVINE_TAIL_WINDUP = 48;
+    public static final int DIVINE_TAIL_RECOVERY = 28;
+    public static final float DIVINE_TAIL_DAMAGE = 18.0F;
+    public static final double DIVINE_TAIL_RANGE = 11.0D;
+    public static final int BULL_SLASH_WINDUP = 35;
+    public static final int BULL_SLASH_CHASE = 45;
+    public static final int BULL_SLASH_RECOVERY = 24;
+    public static final int BULL_SLASH_COUNT = 6;
+    public static final int BULL_SLASH_INTERVAL = 6;
+    public static final float BULL_SLASH_DAMAGE = 8.0F;
+    public static final double BULL_SLASH_RANGE = 5.0D;
+    public static final int BULL_SLASH_ARMOR_DISABLE_TICKS = 300;
+    public static final int AERIAL_SLAM_WINDUP = 42;
+    public static final int AERIAL_SLAM_ACTIVE = 18;
+    public static final int AERIAL_SLAM_RECOVERY = 24;
+    public static final float AERIAL_SLAM_DAMAGE = 20.0F;
+    public static final double AERIAL_SLAM_RADIUS = 7.5D;
+    public static final double AERIAL_SLAM_HEIGHT = 7.0D;
+    public static final int CHARGE_WINDUP = 30;
+    public static final int CHARGE_ACTIVE = 20;
+    public static final int CHARGE_RECOVERY = 20;
+    public static final float CHARGE_DAMAGE = 15.0F;
+    public static final double CHARGE_SPEED = 1.65D;
+    public static final double CHARGE_RANGE = 24.0D;
+    public static final int BUTCHER_SUMMON_INTERVAL_TICKS = 200;
+    public static final int SUMMON_SEQUENCE_TICKS = 80;
+    public static final int SEAL_SCAN_RADIUS = 32;
+    public static final int SOUL_CONTAINER_RETRY_TICKS = 40;
+    public static final int DEFEAT_SEQUENCE_TICKS = 140;
+
+    private Stage3Constants() {
+    }
+}

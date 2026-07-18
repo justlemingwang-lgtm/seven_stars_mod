@@ -17,7 +17,9 @@ POOLS = ROOT / "src/main/resources/data/sevenstars/worldgen/template_pool/triang
 
 
 def s(value): return (8, value)
+def b(value): return (1, value)
 def i(value): return (3, value)
+def d(value): return (6, value)
 def compound(value): return (10, value)
 def list_of(tag, values): return (9, (tag, values))
 
@@ -28,8 +30,12 @@ def utf(value):
 
 
 def payload(tag, value):
+    if tag == 1:
+        return struct.pack(">b", value)
     if tag == 3:
         return struct.pack(">i", value)
+    if tag == 6:
+        return struct.pack(">d", value)
     if tag == 8:
         return utf(value)
     if tag == 9:
@@ -47,6 +53,7 @@ class Template:
     def __init__(self, name, x, z, y):
         self.name, self.size = name, (x, y, z)
         self.blocks = {}
+        self.entities = []
 
     def put(self, x, y, z, name, properties=None, nbt=None):
         if 0 <= x < self.size[0] and 0 <= y < self.size[1] and 0 <= z < self.size[2]:
@@ -98,6 +105,26 @@ class Template:
         self.put(x, y, z, "minecraft:spawner", nbt={"id": s("minecraft:mob_spawner"),
             "Delay": i(40), "SpawnData": compound({"entity": compound(ent)})})
 
+    def item_frame(self, x, y, z, item, facing="south"):
+        facing_ids = {"down": 0, "up": 1, "north": 2, "south": 3, "west": 4, "east": 5}
+        horizontal_steps = {"north": (0, -1), "south": (0, 1), "west": (-1, 0), "east": (1, 0)}
+        dx, dz = horizontal_steps[facing]
+        self.entities.append({
+            "pos": list_of(6, [x + 0.5 - dx * 0.46875, y + 0.5, z + 0.5 - dz * 0.46875]),
+            "blockPos": list_of(3, [x, y, z]),
+            "nbt": compound({
+                "id": s("minecraft:item_frame"),
+                "Facing": b(facing_ids[facing]),
+                "Fixed": b(1),
+                "Invulnerable": b(1),
+                "TileX": i(x),
+                "TileY": i(y),
+                "TileZ": i(z),
+                "ItemRotation": b(0),
+                "Item": compound({"id": s(item), "Count": b(1)})
+            })
+        })
+
     def save(self):
         palette, indices = [], {}
         def state_index(name, props):
@@ -116,7 +143,8 @@ class Template:
                 row["nbt"] = compound(nbt)
             blocks.append(row)
         root = {"DataVersion": i(3465), "size": list_of(3, list(self.size)),
-                "palette": list_of(10, palette), "blocks": list_of(10, blocks), "entities": list_of(10, [])}
+                "palette": list_of(10, palette), "blocks": list_of(10, blocks),
+                "entities": list_of(10, self.entities)}
         raw = bytes([10]) + utf("") + payload(10, root)
         STRUCTURES.mkdir(parents=True, exist_ok=True)
         with (STRUCTURES / f"{self.name}.nbt").open("wb") as file_out:
@@ -606,6 +634,8 @@ def decorate(t):
         for px in range(4,x-4): t.put(px,4,3,"minecraft:dark_oak_slab")
         t.put(x//2,1,4,"minecraft:lectern"); t.put(x//2,1,2,"minecraft:dark_oak_stairs",{"facing":"south","half":"bottom","shape":"straight","waterlogged":"false"})
         t.chest(x//2,1,z-4,"library")
+        # Fixed display: the scale remains in place and unlocks its codex chapter on interaction.
+        t.item_frame(x//2, 3, 1, "sevenstars:azure_dragon_scale", "south")
     elif t.name == "brewing_room":
         for px in range(3,x-3):
             if px%2: t.put(px,1,3,"minecraft:polished_blackstone_brick_slab")
@@ -778,6 +808,13 @@ def generate_templates():
                              if block == "minecraft:spawner"
                              and nbt["SpawnData"][1]["entity"][1]["id"] == s("sevenstars:tormented_wraith")]
             assert len(wraith_spawners) == 1, "ritual classroom must contain exactly one tormented wraith spawner"
+        if t.name == "library":
+            assert len(t.entities) == 1, "main library must contain the Azure Dragon Scale display"
+            frame_nbt = t.entities[0]["nbt"][1]
+            assert frame_nbt["id"] == s("minecraft:item_frame")
+            assert frame_nbt["Item"][1]["id"] == s("sevenstars:azure_dragon_scale")
+        if t.name == "extension_library":
+            assert not t.entities, "extension libraries must not duplicate the unique chapter unlock"
         if t.name in {"stairs_spiral_down", "vertical_district"}:
             stair_facings={props.get("facing") for block,props,_nbt in t.blocks.values()
                            if block == "minecraft:deepslate_tile_stairs"}

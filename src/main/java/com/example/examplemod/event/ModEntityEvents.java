@@ -9,6 +9,7 @@ import com.example.examplemod.entity.FrostShellSilverfishEntity;
 import com.example.examplemod.entity.GoatHunterButcherEntity;
 import com.example.examplemod.entity.StarManePegasusEntity;
 import com.example.examplemod.entity.TormentedWraithEntity;
+import com.example.examplemod.entity.AzureDragonEntity;
 import com.example.examplemod.registry.ModEntities;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Monster;
@@ -30,6 +31,7 @@ public class ModEntityEvents {
         event.put(ModEntities.ALTAR_CULTIST.get(), AltarCultistEntity.createAttributes().build());
         event.put(ModEntities.GOAT_HUNTER_BUTCHER.get(), GoatHunterButcherEntity.createAttributes().build());
         event.put(ModEntities.TORMENTED_WRAITH.get(), TormentedWraithEntity.createAttributes().build());
+        event.put(ModEntities.AZURE_DRAGON.get(), AzureDragonEntity.createAttributes().build());
     }
 
     @SubscribeEvent

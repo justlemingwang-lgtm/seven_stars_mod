@@ -12,6 +12,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.ClipContext;
+import com.example.examplemod.block.AzureSealChainBlock;
 
 import java.util.Comparator;
 import java.util.List;
@@ -56,6 +60,13 @@ public class SixMeridianSwordSkill implements Skill {
     public boolean cast(ServerPlayer player) {
         double range = Config.sixMeridianSwordRange;
         Vec3 look = player.getLookAngle().normalize();
+        Vec3 eye = player.getEyePosition();
+        BlockHitResult blockHit = player.level().clip(new ClipContext(eye, eye.add(look.scale(range)),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+        if (blockHit.getType() == HitResult.Type.BLOCK
+                && AzureSealChainBlock.breakBySixMeridian(player.serverLevel(), blockHit.getBlockPos())) {
+            return true;
+        }
         AABB box = player.getBoundingBox().inflate(range, 1.5D, range);
         List<LivingEntity> targets = player.level().getEntitiesOfClass(LivingEntity.class, box,
                         target -> target != player && target.isAlive() && player.distanceTo(target) <= range)

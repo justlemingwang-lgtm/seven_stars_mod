@@ -6,6 +6,7 @@ import com.example.examplemod.skill.SpellScrollRecipes;
 import com.example.examplemod.stage2.SevenScatteredStrikesCaster;
 import com.example.examplemod.stage2.SkillDisableManager;
 import com.example.examplemod.stage2.SkillIds;
+import com.example.examplemod.stage3.ArmorDisableManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -62,6 +63,10 @@ public class TriangleSkill implements Skill {
 
     @Override
     public boolean canCast(ServerPlayer player) {
+        if (ArmorDisableManager.isArmorDisabled(player)) {
+            player.displayClientMessage(Component.translatable("message.sevenstars.armor_disabled"), true);
+            return false;
+        }
         if (!player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.TRIANGLE_ARMOR.get())) {
             player.displayClientMessage(Component.translatable("message.sevenstars.triangle_need_armor"), true);
             return false;

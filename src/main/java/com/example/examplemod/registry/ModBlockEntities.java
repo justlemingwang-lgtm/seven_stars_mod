@@ -2,6 +2,7 @@ package com.example.examplemod.registry;
 
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.block.GoatHornAltarBlockEntity;
+import com.example.examplemod.block.AzureSoulContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -13,6 +14,8 @@ public class ModBlockEntities {
 
     public static final RegistryObject<BlockEntityType<GoatHornAltarBlockEntity>> GOAT_HORN_ALTAR = BLOCK_ENTITIES.register("goat_horn_altar",
             () -> BlockEntityType.Builder.of(GoatHornAltarBlockEntity::new, ModBlocks.GOAT_HORN_ALTAR.get()).build(null));
+    public static final RegistryObject<BlockEntityType<AzureSoulContainerBlockEntity>> AZURE_SOUL_CONTAINER = BLOCK_ENTITIES.register("azure_soul_container",
+            () -> BlockEntityType.Builder.of(AzureSoulContainerBlockEntity::new, ModBlocks.AZURE_SOUL_CONTAINER.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
