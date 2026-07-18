@@ -3,6 +3,7 @@ package com.example.examplemod.registry;
 import com.example.examplemod.ExampleMod;
 import com.example.examplemod.item.AbsorberItem;
 import com.example.examplemod.item.AzureDragonScaleItem;
+import com.example.examplemod.item.AzureDragonEyeItem;
 import com.example.examplemod.item.BloodyCleaverItem;
 import com.example.examplemod.item.ConsumerItem;
 import com.example.examplemod.item.CooldownChestplateItem;
@@ -45,6 +46,8 @@ public class ModItems {
             () -> new SevenStarsCodexItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> AZURE_DRAGON_SCALE = ITEMS.register("azure_dragon_scale",
             () -> new AzureDragonScaleItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> AZURE_DRAGON_EYE = ITEMS.register("azure_dragon_eye",
+            () -> new AzureDragonEyeItem(new Item.Properties().stacksTo(16).rarity(Rarity.RARE)));
     public static final RegistryObject<Item> LOST_STAR_MAGIC_TOKEN = ITEMS.register("lost_star_magic_token",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> QI_HELMET = ITEMS.register("qi_helmet",

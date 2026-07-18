@@ -4,6 +4,8 @@ import com.example.examplemod.ExampleMod;
 import com.example.examplemod.worldgen.structure.TriangleStoneTownPassagePiece;
 import com.example.examplemod.worldgen.structure.TriangleStoneTownPiece;
 import com.example.examplemod.worldgen.structure.TriangleStoneTownStructure;
+import com.example.examplemod.worldgen.structure.SkyArenaStructure;
+import com.example.examplemod.worldgen.structure.SkyArenaStructurePiece;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
@@ -24,6 +26,11 @@ public final class ModStructures {
                     (StructurePieceType.StructureTemplateType) TriangleStoneTownPiece::new);
     public static final RegistryObject<StructurePieceType> TRIANGLE_STONE_TOWN_PASSAGE_PIECE =
             PIECES.register("triangle_stone_town_passage", () -> TriangleStoneTownPassagePiece::new);
+    public static final RegistryObject<StructureType<SkyArenaStructure>> SKY_ARENA =
+            STRUCTURES.register("sky_arena", () -> () -> SkyArenaStructure.CODEC);
+    public static final RegistryObject<StructurePieceType> SKY_ARENA_TEMPLATE_PIECE =
+            PIECES.register("sky_arena_template", () ->
+                    (StructurePieceType.StructureTemplateType) SkyArenaStructurePiece::new);
 
     private ModStructures() {
     }

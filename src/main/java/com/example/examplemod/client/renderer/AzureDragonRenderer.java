@@ -10,21 +10,18 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.client.Minecraft;
-import com.example.examplemod.ExampleMod;
 
 public class AzureDragonRenderer extends MobRenderer<AzureDragonEntity, AzureDragonModel> {
-    private static final ResourceLocation PLACEHOLDER_TEXTURE = new ResourceLocation("textures/entity/enderdragon/dragon.png");
-    private static final ResourceLocation FINAL_TEXTURE = new ResourceLocation(ExampleMod.MODID, "textures/entity/azure_dragon.png");
-    private static final ResourceLocation FINAL_EMISSIVE_TEXTURE = new ResourceLocation(ExampleMod.MODID, "textures/entity/azure_dragon_emissive.png");
+    private static final ResourceLocation DRAGON_TEXTURE = new ResourceLocation("textures/entity/enderdragon/dragon.png");
+    private static final ResourceLocation DRAGON_EYES = new ResourceLocation("textures/entity/enderdragon/dragon_eyes.png");
 
     public AzureDragonRenderer(EntityRendererProvider.Context context) {
-        super(context, new AzureDragonModel(context.bakeLayer(AzureDragonModel.LAYER)), 2.5F);
-        addLayer(new EmissiveLayer(this));
+        super(context, new AzureDragonModel(context.bakeLayer(AzureDragonModel.LAYER)), 3.0F);
+        addLayer(new DragonEyesLayer(this));
     }
 
-    private static final class EmissiveLayer extends RenderLayer<AzureDragonEntity, AzureDragonModel> {
-        private EmissiveLayer(AzureDragonRenderer renderer) {
+    private static final class DragonEyesLayer extends RenderLayer<AzureDragonEntity, AzureDragonModel> {
+        private DragonEyesLayer(AzureDragonRenderer renderer) {
             super(renderer);
         }
 
@@ -32,16 +29,14 @@ public class AzureDragonRenderer extends MobRenderer<AzureDragonEntity, AzureDra
         public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AzureDragonEntity entity,
                            float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks,
                            float netHeadYaw, float headPitch) {
-            if (Minecraft.getInstance().getResourceManager().getResource(FINAL_EMISSIVE_TEXTURE).isEmpty()) return;
-            getParentModel().renderToBuffer(poseStack, buffer.getBuffer(RenderType.eyes(FINAL_EMISSIVE_TEXTURE)),
+            getParentModel().renderToBuffer(poseStack, buffer.getBuffer(RenderType.eyes(DRAGON_EYES)),
                     15728640, LivingEntityRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 
     @Override
     public ResourceLocation getTextureLocation(AzureDragonEntity entity) {
-        return Minecraft.getInstance().getResourceManager().getResource(FINAL_TEXTURE).isPresent()
-                ? FINAL_TEXTURE : PLACEHOLDER_TEXTURE;
+        return DRAGON_TEXTURE;
     }
 
     @Override

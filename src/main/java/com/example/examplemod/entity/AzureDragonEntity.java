@@ -77,6 +77,7 @@ public class AzureDragonEntity extends Monster {
     private int butcherSummonTimer;
     private int defeatTicks;
     private float lockedAttackYaw;
+    private float lockedAttackPitch;
     private AzureDragonAttackType lastAttack = AzureDragonAttackType.NONE;
     private Vec3 lockedTargetPosition = Vec3.ZERO;
     private boolean slamImpacted;
@@ -159,7 +160,7 @@ public class AzureDragonEntity extends Monster {
         goalSelector.addGoal(6, new RandomStrollGoal(this, 0.75D));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 24.0F));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
     public int getPhase() {
@@ -239,6 +240,9 @@ public class AzureDragonEntity extends Monster {
             arenaCenter = blockPosition();
         }
         bossEvent.setProgress(getHealth() / getMaxHealth());
+        if (tickCount % 10 == 0 || !isValidCombatTarget(getTarget())) {
+            refreshCombatTarget();
+        }
         if (isDefeated()) {
             tickDefeated();
             return;
@@ -251,9 +255,9 @@ public class AzureDragonEntity extends Monster {
             tickCurrentAttack();
         } else {
             LivingEntity target = getTarget();
-            if (target != null && target.isAlive() && isInArena(target)) {
+            if (isValidCombatTarget(target)) {
                 pursueTarget(target, 1.0D + getPhase() * 0.06D);
-                if (attackCooldown-- <= 0 && distanceTo(target) <= Stage3Constants.CHARGE_RANGE + 4.0D) {
+                if (attackCooldown-- <= 0) {
                     chooseNextAttack();
                 }
             }
@@ -262,11 +266,34 @@ public class AzureDragonEntity extends Monster {
         if (tickCount % 10 == 0) syncIllusionPlayers();
     }
 
+    private void refreshCombatTarget() {
+        LivingEntity current = getTarget();
+        if (isValidCombatTarget(current)) return;
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        ServerPlayer nearest = serverLevel.players().stream()
+                .filter(player -> player.isAlive() && !player.isCreative() && !player.isSpectator())
+                .min(java.util.Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+        setTarget(nearest);
+    }
+
+    private boolean isValidCombatTarget(LivingEntity entity) {
+        if (entity == null || !entity.isAlive() || entity.level() != level()) return false;
+        return !(entity instanceof Player player) || (!player.isCreative() && !player.isSpectator());
+    }
+
     private void pursueTarget(LivingEntity target, double speed) {
         getLookControl().setLookAt(target, 18.0F, 12.0F);
+        Vec3 toTarget = target.position().subtract(position());
+        Vec3 horizontalToTarget = new Vec3(toTarget.x, 0.0D, toTarget.z);
+        if (horizontalToTarget.lengthSqr() > 0.01D) {
+            float desiredYaw = (float) Math.toDegrees(Math.atan2(-horizontalToTarget.x, horizontalToTarget.z));
+            setYRot(Mth.approachDegrees(getYRot(), desiredYaw, 12.0F));
+            yBodyRot = getYRot();
+        }
         double distance = distanceTo(target);
-        if (distance > 6.0D) {
+        if (distance > 4.25D) {
             getNavigation().moveTo(target, speed);
+            applyChaseAcceleration(horizontalToTarget, speed);
             return;
         }
         if (--orbitTicks <= 0) {
@@ -278,8 +305,19 @@ public class AzureDragonEntity extends Monster {
         if (horizontal.lengthSqr() < 0.01D) horizontal = directionFromYaw(getYRot());
         horizontal = horizontal.normalize();
         Vec3 tangent = new Vec3(-horizontal.z * orbitDirection, 0.0D, horizontal.x * orbitDirection);
-        Vec3 destination = target.position().add(horizontal.scale(5.0D)).add(tangent.scale(3.5D));
+        Vec3 destination = target.position().add(horizontal.scale(3.0D)).add(tangent.scale(1.8D));
         getNavigation().moveTo(destination.x, destination.y, destination.z, speed * 0.9D);
+        applyChaseAcceleration(destination.subtract(position()).multiply(1.0D, 0.0D, 1.0D), speed * 0.65D);
+    }
+
+    private void applyChaseAcceleration(Vec3 horizontalDirection, double speedMultiplier) {
+        if (horizontalDirection.lengthSqr() < 0.01D || horizontalCollision) return;
+        Vec3 direction = horizontalDirection.normalize();
+        double desiredSpeed = getAttributeValue(Attributes.MOVEMENT_SPEED) * speedMultiplier;
+        Vec3 motion = getDeltaMovement();
+        double blend = getNavigation().isDone() ? 0.42D : 0.22D;
+        setDeltaMovement(Mth.lerp(blend, motion.x, direction.x * desiredSpeed), motion.y,
+                Mth.lerp(blend, motion.z, direction.z * desiredSpeed));
     }
 
     public void beginPhaseTransition(int nextPhase) {
@@ -332,22 +370,37 @@ public class AzureDragonEntity extends Monster {
 
     public void chooseNextAttack() {
         LivingEntity target = getTarget();
-        if (target == null || !target.isAlive() || !isInArena(target)) return;
+        if (!isValidCombatTarget(target)) return;
         double distance = distanceTo(target);
         List<AzureDragonAttackType> pool = new ArrayList<>();
-        addWeighted(pool, AzureDragonAttackType.PHYSICAL_BREATH, distance > 7.0D ? 4 : 2);
-        addWeighted(pool, AzureDragonAttackType.STOMP, distance < 9.0D ? 4 : 1);
-        addWeighted(pool, AzureDragonAttackType.TURNING_TAIL, distance < 11.0D ? 3 : 1);
-        addWeighted(pool, AzureDragonAttackType.AERIAL_SLAM, distance > 5.0D ? 3 : 2);
-        addWeighted(pool, AzureDragonAttackType.CHARGE, distance > 9.0D ? 5 : 2);
-        if (getPhase() >= 2) {
-            addWeighted(pool, AzureDragonAttackType.AZURE_BREATH, distance > 6.0D ? 5 : 2);
-            addWeighted(pool, AzureDragonAttackType.DIVINE_TAIL, distance < 12.0D ? 4 : 2);
-            addWeighted(pool, AzureDragonAttackType.BULL_AZURE_SLASH, 4);
-        }
-        if (getPhase() >= 3) {
-            addWeighted(pool, AzureDragonAttackType.AERIAL_SLAM, 2);
-            addWeighted(pool, AzureDragonAttackType.CHARGE, 2);
+        if (distance <= 9.0D) {
+            addWeighted(pool, AzureDragonAttackType.BITE, 9);
+            addWeighted(pool, AzureDragonAttackType.STOMP, 4);
+            addWeighted(pool, AzureDragonAttackType.TURNING_TAIL, 4);
+            addWeighted(pool, AzureDragonAttackType.PHYSICAL_BREATH, 2);
+            if (getPhase() >= 2) {
+                addWeighted(pool, AzureDragonAttackType.BULL_AZURE_SLASH, 9);
+                addWeighted(pool, AzureDragonAttackType.DIVINE_TAIL, 5);
+                addWeighted(pool, AzureDragonAttackType.AZURE_BREATH, 2);
+            }
+        } else if (distance <= 22.0D) {
+            addWeighted(pool, AzureDragonAttackType.PHYSICAL_BREATH, 5);
+            addWeighted(pool, AzureDragonAttackType.CHARGE, 5);
+            addWeighted(pool, AzureDragonAttackType.AERIAL_SLAM, 3);
+            addWeighted(pool, AzureDragonAttackType.BITE, 2);
+            if (getPhase() >= 2) {
+                addWeighted(pool, AzureDragonAttackType.BULL_AZURE_SLASH, 7);
+                addWeighted(pool, AzureDragonAttackType.AZURE_BREATH, 6);
+                addWeighted(pool, AzureDragonAttackType.DIVINE_TAIL, 2);
+            }
+        } else {
+            addWeighted(pool, AzureDragonAttackType.CHARGE, 7);
+            addWeighted(pool, AzureDragonAttackType.AERIAL_SLAM, 5);
+            addWeighted(pool, AzureDragonAttackType.PHYSICAL_BREATH, 6);
+            if (getPhase() >= 2) {
+                addWeighted(pool, AzureDragonAttackType.AZURE_BREATH, 8);
+                addWeighted(pool, AzureDragonAttackType.BULL_AZURE_SLASH, 3);
+            }
         }
         if (pool.size() > 1) pool.removeIf(type -> type == lastAttack);
         AzureDragonAttackType selected = pool.get(random.nextInt(pool.size()));
@@ -366,11 +419,28 @@ public class AzureDragonEntity extends Monster {
         lastAttack = type;
         LivingEntity target = getTarget();
         lockedTargetPosition = target == null ? position() : target.position();
+        if (target != null && (type == AzureDragonAttackType.PHYSICAL_BREATH
+                || type == AzureDragonAttackType.AZURE_BREATH
+                || type == AzureDragonAttackType.CHARGE
+                || type == AzureDragonAttackType.BULL_AZURE_SLASH)) {
+            faceAttackTarget(target, 360.0F, true);
+        }
+        if (target != null && (type == AzureDragonAttackType.PHYSICAL_BREATH
+                || type == AzureDragonAttackType.AZURE_BREATH)) {
+            faceBreathPitch(target, 360.0F);
+        } else {
+            lockedAttackPitch = 0.0F;
+            setXRot(0.0F);
+        }
         slamImpacted = false;
         attackVictims.clear();
         setNoGravity(type == AzureDragonAttackType.AERIAL_SLAM);
         setGlowingTag(true);
-        getNavigation().stop();
+        if (type == AzureDragonAttackType.AERIAL_SLAM || type == AzureDragonAttackType.CHARGE) {
+            getNavigation().stop();
+        } else if (target != null) {
+            pursueTarget(target, type == AzureDragonAttackType.BITE ? 1.25D : 0.85D);
+        }
         if (!level().isClientSide()) {
             var sound = switch (type) {
                 case PHYSICAL_BREATH, AZURE_BREATH -> SoundEvents.ENDER_DRAGON_SHOOT;
@@ -378,6 +448,7 @@ public class AzureDragonEntity extends Monster {
                 case TURNING_TAIL, DIVINE_TAIL, BULL_AZURE_SLASH -> SoundEvents.PLAYER_ATTACK_SWEEP;
                 case AERIAL_SLAM -> SoundEvents.ENDER_DRAGON_FLAP;
                 case CHARGE -> SoundEvents.RAVAGER_ROAR;
+                case BITE -> SoundEvents.RAVAGER_ATTACK;
                 default -> SoundEvents.ENDER_DRAGON_GROWL;
             };
             level().playSound(null, blockPosition(), sound, SoundSource.HOSTILE, 1.4F, 0.9F);
@@ -388,8 +459,13 @@ public class AzureDragonEntity extends Monster {
     private void announceTelegraph(AzureDragonAttackType type) {
         if (!(level() instanceof ServerLevel serverLevel)) return;
         String key = "message.sevenstars.azure_dragon.telegraph." + type.name().toLowerCase(java.util.Locale.ROOT);
-        for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, arenaBounds(), this::isInArena)) {
+        for (ServerPlayer player : serverLevel.players()) {
+            if (player != getTarget() && distanceToSqr(player) > Stage3Constants.AZURE_DRAGON_FOLLOW_RANGE
+                    * Stage3Constants.AZURE_DRAGON_FOLLOW_RANGE) continue;
             player.displayClientMessage(Component.translatable(key), true);
+            if (type == AzureDragonAttackType.AZURE_BREATH) {
+                player.displayClientMessage(Component.translatable(key), false);
+            }
         }
     }
 
@@ -402,20 +478,42 @@ public class AzureDragonEntity extends Monster {
             finishAttack();
             return;
         }
+        if (type != AzureDragonAttackType.AERIAL_SLAM && type != AzureDragonAttackType.CHARGE
+                && type != AzureDragonAttackType.BULL_AZURE_SLASH) {
+            double chaseSpeed = type == AzureDragonAttackType.BITE ? 1.3D
+                    : type == AzureDragonAttackType.PHYSICAL_BREATH || type == AzureDragonAttackType.AZURE_BREATH
+                    ? 0.52D : 0.72D;
+            pursueTarget(target, chaseSpeed);
+        }
         if (tick < windup(type)) {
             getLookControl().setLookAt(target, 12.0F, 10.0F);
-            lockedAttackYaw = getYRot();
+            if (type == AzureDragonAttackType.CHARGE) {
+                faceAttackTarget(target, 24.0F, true);
+            } else if (type == AzureDragonAttackType.BULL_AZURE_SLASH) {
+                faceAttackTarget(target, 32.0F, true);
+            } else if (type == AzureDragonAttackType.PHYSICAL_BREATH
+                    || type == AzureDragonAttackType.AZURE_BREATH) {
+                faceAttackTarget(target, 14.0F, false);
+                faceBreathPitch(target, 12.0F);
+            } else {
+                faceAttackTarget(target, 12.0F, false);
+            }
             if (type != AzureDragonAttackType.AERIAL_SLAM) lockedTargetPosition = target.position();
             spawnWarning(type, tick);
-            if (type != AzureDragonAttackType.AERIAL_SLAM && type != AzureDragonAttackType.CHARGE) {
+            if (type == AzureDragonAttackType.AZURE_BREATH
+                    && tick == Math.max(1, Stage3Constants.AZURE_BREATH_WINDUP - 5)) {
+                announceAzureBreathReleaseWarning();
+            }
+            if (type == AzureDragonAttackType.BULL_AZURE_SLASH) {
                 pursueTarget(target, 0.58D);
             }
         }
         switch (type) {
             case PHYSICAL_BREATH -> {
-                if (tick == Stage3Constants.PHYSICAL_BREATH_WINDUP) hitCone(false,
-                        Stage3Constants.PHYSICAL_BREATH_RANGE, Stage3Constants.PHYSICAL_BREATH_HALF_ANGLE,
-                        Stage3Constants.PHYSICAL_BREATH_DAMAGE, false);
+                int activeTick = tick - Stage3Constants.PHYSICAL_BREATH_WINDUP;
+                if (activeTick >= 0 && activeTick < Stage3Constants.PHYSICAL_BREATH_ACTIVE) {
+                    tickBreath(target, false, activeTick);
+                }
             }
             case STOMP -> {
                 if (tick == Stage3Constants.STOMP_WINDUP) hitRadius(Stage3Constants.STOMP_RADIUS,
@@ -427,10 +525,8 @@ public class AzureDragonEntity extends Monster {
             }
             case AZURE_BREATH -> {
                 int activeTick = tick - Stage3Constants.AZURE_BREATH_WINDUP;
-                if (activeTick >= 0 && activeTick < Stage3Constants.AZURE_BREATH_ACTIVE
-                        && activeTick % Stage3Constants.AZURE_BREATH_PULSE_INTERVAL == 0) {
-                    hitCone(true, Stage3Constants.AZURE_BREATH_RANGE, Stage3Constants.AZURE_BREATH_HALF_ANGLE,
-                            Stage3Constants.AZURE_BREATH_DAMAGE, true);
+                if (activeTick >= 0 && activeTick < Stage3Constants.AZURE_BREATH_ACTIVE) {
+                    tickBreath(target, true, activeTick);
                 }
             }
             case DIVINE_TAIL -> {
@@ -440,26 +536,90 @@ public class AzureDragonEntity extends Monster {
             case BULL_AZURE_SLASH -> tickBullSlash(tick, target);
             case AERIAL_SLAM -> tickAerialSlam(tick, target);
             case CHARGE -> tickCharge(tick);
+            case BITE -> {
+                if (tick == Stage3Constants.BITE_WINDUP) {
+                    hitCone(false, Stage3Constants.BITE_RANGE, Stage3Constants.BITE_HALF_ANGLE,
+                            Stage3Constants.BITE_DAMAGE, false);
+                    level().playSound(null, blockPosition(), SoundEvents.FOX_BITE,
+                            SoundSource.HOSTILE, 1.5F, 0.72F);
+                }
+            }
             default -> {
             }
         }
         if (tick >= totalDuration(type)) finishAttack();
     }
 
+    private void tickBreath(LivingEntity target, boolean azure, int activeTick) {
+        // The aim follows a smoothed historic position rather than the live player position.
+        // This creates a short tracking delay so sustained lateral movement can evade the cone.
+        if (activeTick == 0) {
+            // Release always starts exactly on the current target. Delayed tracking begins afterwards.
+            lockedTargetPosition = target.position();
+        } else {
+            lockedTargetPosition = lockedTargetPosition.lerp(target.position(), azure ? 0.065D : 0.075D);
+        }
+        Vec3 aimDelta = lockedTargetPosition.subtract(position());
+        float desiredYaw = (float) Math.toDegrees(Math.atan2(-aimDelta.x, aimDelta.z));
+        Vec3 mouth = breathMouthPosition();
+        Vec3 verticalAim = lockedTargetPosition.add(0.0D, target.getBbHeight() * 0.55D, 0.0D).subtract(mouth);
+        float desiredPitch = (float) -Math.toDegrees(Math.atan2(verticalAim.y, verticalAim.horizontalDistance()));
+        lockedAttackYaw = activeTick == 0 ? desiredYaw
+                : Mth.approachDegrees(lockedAttackYaw, desiredYaw, azure ? 1.1F : 1.35F);
+        lockedAttackPitch = activeTick == 0 ? desiredPitch
+                : Mth.approachDegrees(lockedAttackPitch, desiredPitch, azure ? 0.8F : 1.0F);
+        // Keep visual head/body direction identical to the actual cone and particle stream.
+        setYRot(lockedAttackYaw);
+        yBodyRot = lockedAttackYaw;
+        setYHeadRot(lockedAttackYaw);
+        setXRot(lockedAttackPitch);
+        spawnBreathStream(azure);
+        int interval = azure ? Stage3Constants.AZURE_BREATH_PULSE_INTERVAL
+                : Stage3Constants.PHYSICAL_BREATH_PULSE_INTERVAL;
+        if (activeTick % interval == 0) {
+            hitBreathCone(azure, azure ? Stage3Constants.AZURE_BREATH_RANGE : Stage3Constants.PHYSICAL_BREATH_RANGE,
+                    azure ? Stage3Constants.AZURE_BREATH_HALF_ANGLE : Stage3Constants.PHYSICAL_BREATH_HALF_ANGLE,
+                    azure ? Stage3Constants.AZURE_BREATH_DAMAGE : Stage3Constants.PHYSICAL_BREATH_DAMAGE,
+                    azure);
+        }
+    }
+
+    private void spawnBreathStream(boolean azure) {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        double range = azure ? Stage3Constants.AZURE_BREATH_RANGE : Stage3Constants.PHYSICAL_BREATH_RANGE;
+        Vec3 direction = directionFromRotation(lockedAttackYaw, lockedAttackPitch);
+        Vec3 mouth = breathMouthPosition();
+        for (double distance = 0.0D; distance <= range; distance += 3.0D) {
+            Vec3 point = mouth.add(direction.scale(distance));
+            double spread = 0.18D + distance * 0.055D;
+            serverLevel.sendParticles(azure ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME,
+                    point.x, point.y, point.z, 1, spread, spread * 0.35D, spread, 0.015D);
+            if (((int) distance) % 6 == 0) {
+                serverLevel.sendParticles(azure ? AZURE_DUST : ParticleTypes.LARGE_SMOKE,
+                        point.x, point.y, point.z, 1, spread * 0.7D, spread * 0.25D, spread * 0.7D, 0.01D);
+            }
+        }
+    }
+
     private void tickBullSlash(int tick, LivingEntity target) {
         int chaseStart = Stage3Constants.BULL_SLASH_WINDUP;
         int chaseEnd = chaseStart + Stage3Constants.BULL_SLASH_CHASE;
+        faceAttackTarget(target, 32.0F, true);
         if (tick >= chaseStart && tick < chaseEnd) {
             getNavigation().moveTo(target, 1.35D);
+            applyChaseAcceleration(target.position().subtract(position()).multiply(1.0D, 0.0D, 1.0D), 1.35D);
             int relative = tick - chaseStart;
             if (relative % Stage3Constants.BULL_SLASH_INTERVAL == 0
                     && relative / Stage3Constants.BULL_SLASH_INTERVAL < Stage3Constants.BULL_SLASH_COUNT) {
+                faceAttackTarget(target, 360.0F, true);
                 hitRadius(Stage3Constants.BULL_SLASH_RANGE, Stage3Constants.BULL_SLASH_DAMAGE, true, true);
                 if (level() instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(AZURE_DUST, getX(), getY() + 1.5D, getZ(), 20,
                             2.0D, 1.0D, 2.0D, 0.1D);
                 }
             }
+        } else if (tick >= chaseEnd) {
+            pursueTarget(target, 0.8D);
         }
     }
 
@@ -507,6 +667,9 @@ public class AzureDragonEntity extends Monster {
         }
         if (active < Stage3Constants.CHARGE_ACTIVE) {
             Vec3 direction = directionFromYaw(lockedAttackYaw);
+            setYRot(lockedAttackYaw);
+            yBodyRot = lockedAttackYaw;
+            setYHeadRot(lockedAttackYaw);
             setDeltaMovement(direction.x * Stage3Constants.CHARGE_SPEED, getDeltaMovement().y,
                     direction.z * Stage3Constants.CHARGE_SPEED);
             AABB hitBox = getBoundingBox().expandTowards(direction.scale(2.0D)).inflate(2.2D, 1.2D, 2.2D);
@@ -530,6 +693,7 @@ public class AzureDragonEntity extends Monster {
         entityData.set(ATTACK_TICK, 0);
         setNoGravity(false);
         setGlowingTag(false);
+        setXRot(0.0F);
         slamImpacted = false;
         attackVictims.clear();
         attackCooldown = Stage3Constants.ATTACK_INTERVAL_MIN_TICKS
@@ -547,6 +711,7 @@ public class AzureDragonEntity extends Monster {
             case BULL_AZURE_SLASH -> Stage3Constants.BULL_SLASH_WINDUP;
             case AERIAL_SLAM -> Stage3Constants.AERIAL_SLAM_WINDUP;
             case CHARGE -> Stage3Constants.CHARGE_WINDUP;
+            case BITE -> Stage3Constants.BITE_WINDUP;
             default -> 0;
         };
     }
@@ -561,6 +726,7 @@ public class AzureDragonEntity extends Monster {
             case BULL_AZURE_SLASH -> Stage3Constants.BULL_SLASH_WINDUP + Stage3Constants.BULL_SLASH_CHASE + Stage3Constants.BULL_SLASH_RECOVERY;
             case AERIAL_SLAM -> Stage3Constants.AERIAL_SLAM_WINDUP + Stage3Constants.AERIAL_SLAM_ACTIVE + Stage3Constants.AERIAL_SLAM_RECOVERY;
             case CHARGE -> Stage3Constants.CHARGE_WINDUP + Stage3Constants.CHARGE_ACTIVE + Stage3Constants.CHARGE_RECOVERY;
+            case BITE -> Stage3Constants.BITE_WINDUP + Stage3Constants.BITE_RECOVERY;
             default -> 1;
         };
     }
@@ -581,6 +747,20 @@ public class AzureDragonEntity extends Monster {
                 serverLevel.sendParticles(WARNING_DUST, getX() - Math.sin(radians) * radius, getY() + 0.3D,
                         getZ() + Math.cos(radians) * radius, 1, 0.02D, 0.02D, 0.02D, 0.0D);
             }
+        } else if (type == AzureDragonAttackType.BITE) {
+            Vec3 direction = directionFromYaw(lockedAttackYaw);
+            Vec3 mouth = position().add(0.0D, 2.2D, 0.0D).add(direction.scale(5.5D));
+            serverLevel.sendParticles(WARNING_DUST, mouth.x, mouth.y, mouth.z,
+                    12, 0.75D, 0.55D, 0.75D, 0.02D);
+        } else if (type == AzureDragonAttackType.BULL_AZURE_SLASH) {
+            Vec3 direction = directionFromYaw(lockedAttackYaw);
+            Vec3 side = new Vec3(direction.z, 0.0D, -direction.x);
+            Vec3 left = position().add(side.scale(4.5D)).add(0.0D, 2.0D, 0.0D);
+            Vec3 right = position().add(side.scale(-4.5D)).add(0.0D, 2.0D, 0.0D);
+            serverLevel.sendParticles(WARNING_DUST, left.x, left.y, left.z, 10,
+                    0.8D, 0.45D, 0.8D, 0.02D);
+            serverLevel.sendParticles(WARNING_DUST, right.x, right.y, right.z, 10,
+                    0.8D, 0.45D, 0.8D, 0.02D);
         } else if (type == AzureDragonAttackType.AERIAL_SLAM) {
             drawWarningRing(serverLevel, lockedTargetPosition, Stage3Constants.AERIAL_SLAM_RADIUS);
             serverLevel.sendParticles(WARNING_DUST, lockedTargetPosition.x, lockedTargetPosition.y + 0.15D,
@@ -597,16 +777,38 @@ public class AzureDragonEntity extends Monster {
                 }
             }
         } else {
-            Vec3 mouth = getEyePosition().add(directionFromYaw(lockedAttackYaw).scale(1.5D));
+            Vec3 mouth = breathMouthPosition();
             serverLevel.sendParticles(WARNING_DUST, mouth.x, mouth.y, mouth.z,
                     10, 0.5D, 0.35D, 0.5D, 0.02D);
             Vec3 direction = directionFromYaw(lockedAttackYaw);
-            for (int step = 3; step <= 15; step += 3) {
+            int warningRange = type == AzureDragonAttackType.AZURE_BREATH
+                    ? (int) Stage3Constants.AZURE_BREATH_RANGE : 15;
+            if (type == AzureDragonAttackType.AZURE_BREATH) {
+                double charge = Math.min(1.0D, tick / (double) Stage3Constants.AZURE_BREATH_WINDUP);
+                serverLevel.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, mouth.x, mouth.y, mouth.z,
+                        12 + (int) (charge * 18.0D), 0.35D + charge * 0.75D,
+                        0.25D + charge * 0.55D, 0.35D + charge * 0.75D, 0.025D);
+                serverLevel.sendParticles(ParticleTypes.END_ROD, mouth.x, mouth.y, mouth.z,
+                        5, 0.45D, 0.35D, 0.45D, 0.015D);
+            }
+            for (int step = 3; step <= warningRange; step += 3) {
                 Vec3 marker = position().add(direction.scale(step));
                 serverLevel.sendParticles(type == AzureDragonAttackType.AZURE_BREATH
                                 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.CLOUD,
                         marker.x, getY() + 0.35D, marker.z, 2, 0.2D, 0.05D, 0.2D, 0.0D);
             }
+        }
+    }
+
+    private void announceAzureBreathReleaseWarning() {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        serverLevel.playSound(null, blockPosition(), SoundEvents.RESPAWN_ANCHOR_CHARGE,
+                SoundSource.HOSTILE, 1.6F, 1.25F);
+        for (ServerPlayer player : serverLevel.players()) {
+            if (player != getTarget() && distanceToSqr(player) > Stage3Constants.AZURE_DRAGON_FOLLOW_RANGE
+                    * Stage3Constants.AZURE_DRAGON_FOLLOW_RANGE) continue;
+            player.displayClientMessage(Component.translatable(
+                    "message.sevenstars.azure_dragon.telegraph.azure_breath_release"), true);
         }
     }
 
@@ -627,6 +829,19 @@ public class AzureDragonEntity extends Monster {
             if (delta.lengthSqr() > range * range || Math.abs(delta.y) > 5.0D) continue;
             Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
             if (horizontal.lengthSqr() < 0.01D || forward.dot(horizontal.normalize()) < minDot || !hasLineOfSight(player)) continue;
+            hurtPlayer(player, damage, magic, disableTriangle, false);
+        }
+    }
+
+    private void hitBreathCone(boolean magic, double range, double halfAngle, float damage, boolean disableTriangle) {
+        Vec3 origin = breathMouthPosition();
+        Vec3 forward = directionFromRotation(lockedAttackYaw, lockedAttackPitch);
+        double minDot = Math.cos(Math.toRadians(halfAngle));
+        for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(range + 7.0D),
+                player -> player.isAlive() && !player.isCreative() && !player.isSpectator())) {
+            Vec3 delta = player.getBoundingBox().getCenter().subtract(origin);
+            if (delta.lengthSqr() > range * range || delta.lengthSqr() < 0.01D
+                    || forward.dot(delta.normalize()) < minDot || !hasLineOfSight(player)) continue;
             hurtPlayer(player, damage, magic, disableTriangle, false);
         }
     }
@@ -666,6 +881,37 @@ public class AzureDragonEntity extends Monster {
     private static Vec3 directionFromYaw(float yaw) {
         double radians = Math.toRadians(yaw);
         return new Vec3(-Math.sin(radians), 0.0D, Math.cos(radians)).normalize();
+    }
+
+    private static Vec3 directionFromRotation(float yaw, float pitch) {
+        double yawRadians = Math.toRadians(yaw);
+        double pitchRadians = Math.toRadians(pitch);
+        double horizontal = Math.cos(pitchRadians);
+        return new Vec3(-Math.sin(yawRadians) * horizontal, -Math.sin(pitchRadians),
+                Math.cos(yawRadians) * horizontal).normalize();
+    }
+
+    private Vec3 breathMouthPosition() {
+        return position().add(0.0D, 2.4D, 0.0D).add(directionFromYaw(lockedAttackYaw).scale(4.5D));
+    }
+
+    private void faceAttackTarget(LivingEntity target, float maxTurn, boolean lockDirectlyToTarget) {
+        Vec3 delta = target.position().subtract(position());
+        if (delta.horizontalDistanceSqr() < 0.0001D) return;
+        float desiredYaw = (float) Math.toDegrees(Math.atan2(-delta.x, delta.z));
+        float facingYaw = Mth.approachDegrees(getYRot(), desiredYaw, maxTurn);
+        setYRot(facingYaw);
+        yBodyRot = facingYaw;
+        setYHeadRot(facingYaw);
+        lockedAttackYaw = lockDirectlyToTarget ? desiredYaw : facingYaw;
+    }
+
+    private void faceBreathPitch(LivingEntity target, float maxTurn) {
+        Vec3 delta = target.position().add(0.0D, target.getBbHeight() * 0.55D, 0.0D)
+                .subtract(breathMouthPosition());
+        float desiredPitch = (float) -Math.toDegrees(Math.atan2(delta.y, delta.horizontalDistance()));
+        lockedAttackPitch = Mth.approachDegrees(lockedAttackPitch, desiredPitch, maxTurn);
+        setXRot(lockedAttackPitch);
     }
 
     public boolean hurt(AzureDragonPart part, DamageSource source, float amount) {
@@ -781,7 +1027,7 @@ public class AzureDragonEntity extends Monster {
         if (!(level() instanceof ServerLevel serverLevel)) return;
         for (UUID uuid : participants) {
             ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(uuid);
-            if (player == null || !isInArena(player)) continue;
+            if (player == null) continue;
             CompoundTag persisted = player.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
             player.getPersistentData().put(Player.PERSISTED_NBT_TAG, persisted);
             if (persisted.getBoolean("sevenstars_azure_dragon_reward")) continue;
@@ -828,8 +1074,9 @@ public class AzureDragonEntity extends Monster {
         boolean active = getPhase() >= 3 && !isDefeated();
         Set<UUID> now = new HashSet<>();
         if (active) {
-            for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, arenaBounds(),
-                    player -> player.isAlive() && this.isInArena(player))) {
+            for (ServerPlayer player : serverLevel.players()) {
+                if (!player.isAlive() || (player != getTarget() && distanceToSqr(player) >
+                        Stage3Constants.AZURE_DRAGON_FOLLOW_RANGE * Stage3Constants.AZURE_DRAGON_FOLLOW_RANGE)) continue;
                 now.add(player.getUUID());
                 if (!illusionPlayers.contains(player.getUUID())) sendIllusion(player, true);
             }
@@ -857,14 +1104,6 @@ public class AzureDragonEntity extends Monster {
         illusionPlayers.clear();
     }
 
-    public boolean isInArena(Entity entity) {
-        if (!entity.level().dimension().equals(level().dimension())) return false;
-        Vec3 center = Vec3.atCenterOf(arenaCenter);
-        Vec3 delta = entity.position().subtract(center);
-        return delta.horizontalDistanceSqr() <= Stage3Constants.ARENA_RADIUS * Stage3Constants.ARENA_RADIUS
-                && Math.abs(delta.y) <= Stage3Constants.ARENA_VERTICAL_RANGE;
-    }
-
     private AABB arenaBounds() {
         return new AABB(arenaCenter).inflate(Stage3Constants.ARENA_RADIUS,
                 Stage3Constants.ARENA_VERTICAL_RANGE, Stage3Constants.ARENA_RADIUS);
@@ -874,7 +1113,7 @@ public class AzureDragonEntity extends Monster {
     public void startSeenByPlayer(ServerPlayer player) {
         super.startSeenByPlayer(player);
         bossEvent.addPlayer(player);
-        if (getPhase() >= 3 && isInArena(player) && !isDefeated()) sendIllusion(player, true);
+        if (getPhase() >= 3 && !isDefeated()) sendIllusion(player, true);
     }
 
     @Override
@@ -937,6 +1176,12 @@ public class AzureDragonEntity extends Monster {
         tag.putInt("ButcherSummonTimer", butcherSummonTimer);
         tag.putInt("DefeatTicks", defeatTicks);
         tag.putFloat("LockedAttackYaw", lockedAttackYaw);
+        tag.putFloat("LockedAttackPitch", lockedAttackPitch);
+        tag.putDouble("LockedTargetX", lockedTargetPosition.x);
+        tag.putDouble("LockedTargetY", lockedTargetPosition.y);
+        tag.putDouble("LockedTargetZ", lockedTargetPosition.z);
+        tag.putInt("LastAttack", lastAttack.ordinal());
+        tag.putBoolean("SlamImpacted", slamImpacted);
         tag.putInt("ArenaX", arenaCenter.getX());
         tag.putInt("ArenaY", arenaCenter.getY());
         tag.putInt("ArenaZ", arenaCenter.getZ());
@@ -958,6 +1203,11 @@ public class AzureDragonEntity extends Monster {
         butcherSummonTimer = Math.max(0, tag.getInt("ButcherSummonTimer"));
         defeatTicks = Math.max(0, tag.getInt("DefeatTicks"));
         lockedAttackYaw = tag.getFloat("LockedAttackYaw");
+        lockedAttackPitch = tag.getFloat("LockedAttackPitch");
+        lockedTargetPosition = new Vec3(tag.getDouble("LockedTargetX"), tag.getDouble("LockedTargetY"),
+                tag.getDouble("LockedTargetZ"));
+        lastAttack = AzureDragonAttackType.byId(tag.getInt("LastAttack"));
+        slamImpacted = tag.getBoolean("SlamImpacted");
         arenaCenter = new BlockPos(tag.getInt("ArenaX"), tag.getInt("ArenaY"), tag.getInt("ArenaZ"));
         participants.clear();
         for (Tag entry : tag.getList("Participants", Tag.TAG_STRING)) {
@@ -968,5 +1218,7 @@ public class AzureDragonEntity extends Monster {
         }
         if (isTransitioning() || isDefeated()) setInvulnerable(true);
         if (isDefeated()) setNoAi(true);
+        if (getAttackType() == AzureDragonAttackType.AERIAL_SLAM && !slamImpacted) setNoGravity(true);
+        if (getAttackType() != AzureDragonAttackType.NONE && !isDefeated()) setGlowingTag(true);
     }
 }

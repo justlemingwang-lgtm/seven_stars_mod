@@ -44,7 +44,7 @@ public final class QinglongIllusionEffects {
     public static void onOverlay(RenderGuiOverlayEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
         if (!ClientQinglongIllusion.isActive() || minecraft.options.hideGui) return;
-        int alpha = 42 + (int) (10.0D * Math.sin(ClientQinglongIllusion.getVisualTicks() * 0.08D));
+        int alpha = 16; // Approximately 15% opaque (38 / 255).
         event.getGuiGraphics().fill(0, 0, event.getWindow().getGuiScaledWidth(),
                 event.getWindow().getGuiScaledHeight(), (alpha << 24) | 0xD13B08);
     }
@@ -52,16 +52,16 @@ public final class QinglongIllusionEffects {
     @SubscribeEvent
     public static void onFogColor(ViewportEvent.ComputeFogColor event) {
         if (!ClientQinglongIllusion.isActive()) return;
-        event.setRed(0.68F);
-        event.setGreen(0.13F);
-        event.setBlue(0.035F);
+        event.setRed(0.48F);
+        event.setGreen(0.24F);
+        event.setBlue(0.16F);
     }
 
     @SubscribeEvent
     public static void onFog(ViewportEvent.RenderFog event) {
         if (!ClientQinglongIllusion.isActive()) return;
-        event.setNearPlaneDistance(0.0F);
-        event.setFarPlaneDistance(18.0F);
+        event.setNearPlaneDistance(3.0F);
+        event.setFarPlaneDistance(48.0F);
         event.setCanceled(true);
     }
 

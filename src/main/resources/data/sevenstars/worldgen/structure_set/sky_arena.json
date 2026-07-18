@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "sevenstars:sky_arena",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 192,
+    "separation": 64,
+    "salt": 739164527
+  }
+}

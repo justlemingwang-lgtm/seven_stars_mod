@@ -7,7 +7,6 @@ import com.example.examplemod.qi.QiManager;
 import com.example.examplemod.registry.ModBlocks;
 import com.example.examplemod.registry.ModItems;
 import com.example.examplemod.stage2.SkillDisableManager;
-import com.example.examplemod.stage3.ArmorDisableManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -367,8 +366,7 @@ public class SkillManager {
     }
 
     private static boolean hasCooldownOverride(ServerPlayer player) {
-        return !ArmorDisableManager.isArmorDisabled(player)
-                && player.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.COOLDOWN_CHESTPLATE.get());
+        return player.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.COOLDOWN_CHESTPLATE.get());
     }
 
     public static boolean grantSkillDirect(ServerPlayer player, String skillId) {

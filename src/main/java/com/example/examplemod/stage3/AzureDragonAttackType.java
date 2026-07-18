@@ -9,9 +9,10 @@ public enum AzureDragonAttackType {
     AZURE_BREATH,
     DIVINE_TAIL,
     BULL_AZURE_SLASH,
+    DEFEATED,
     AERIAL_SLAM,
     CHARGE,
-    DEFEATED;
+    BITE;
 
     public static AzureDragonAttackType byId(int id) {
         AzureDragonAttackType[] values = values();

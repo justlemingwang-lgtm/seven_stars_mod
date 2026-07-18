@@ -9,7 +9,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import com.example.examplemod.stage3.ArmorDisableManager;
 
 @Mod.EventBusSubscriber(modid = ExampleMod.MODID)
 public class QiHelmetEvents {
@@ -24,9 +23,7 @@ public class QiHelmetEvents {
         boolean nowWearing = event.getTo().is(ModItems.QI_HELMET.get());
         boolean wasWearing = event.getFrom().is(ModItems.QI_HELMET.get());
         if (nowWearing && !wasWearing) {
-            if (!ArmorDisableManager.isArmorDisabled(player)) {
-                QiManager.setMaxQi(player, Config.qiHelmetMaxQi, true);
-            }
+            QiManager.setMaxQi(player, Config.qiHelmetMaxQi, true);
         } else if (!nowWearing && wasWearing) {
             QiManager.setMaxQi(player, Config.getMaxQiDefaultInt(), false);
         }

@@ -98,6 +98,15 @@ public class AzureSoulContainerBlockEntity extends BlockEntity {
                 + ", ticks=" + summonSequenceTicks;
     }
 
+    public void resetForDebug() {
+        summoned = false;
+        summonSequenceActive = false;
+        summonSequenceTicks = 0;
+        retryTicks = 0;
+        setChanged();
+        syncVisualState();
+    }
+
     private void syncVisualState() {
         if (level == null) return;
         BlockState state = getBlockState();
