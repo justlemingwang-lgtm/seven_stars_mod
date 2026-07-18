@@ -173,6 +173,8 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.AZURE_SOUL_CONTAINER.get(), new Item.Properties()));
     public static final RegistryObject<Item> AZURE_BUTCHER_SPAWN_RUNE = ITEMS.register("azure_butcher_spawn_rune",
             () -> new BlockItem(ModBlocks.AZURE_BUTCHER_SPAWN_RUNE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> AZURE_DRAGON_SPAWN_EGG = ITEMS.register("azure_dragon_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.AZURE_DRAGON, 0x0B4A53, 0xD7F5F2, new Item.Properties()));
     public static final RegistryObject<Item> STAR_MANE_PEGASUS_SPAWN_EGG = ITEMS.register("star_mane_pegasus_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.STAR_MANE_PEGASUS, 0xD8C47A, 0x74D8FF, new Item.Properties()));
     public static final RegistryObject<Item> FROST_SHELL_SILVERFISH_SPAWN_EGG = ITEMS.register("frost_shell_silverfish_spawn_egg",

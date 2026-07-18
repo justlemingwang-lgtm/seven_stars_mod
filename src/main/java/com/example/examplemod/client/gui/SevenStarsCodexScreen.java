@@ -36,7 +36,7 @@ public class SevenStarsCodexScreen extends Screen {
             chapter("stage2.chop", "stage2", 2, new ItemStack(ModItems.BLOODY_CLEAVER.get())),
             chapter("stage2.triangle_town", "stage2", 2, new ItemStack(ModItems.SOUL_CALMING_LAMP.get())),
             chapter("stage2.triangle", "stage2", 2, new ItemStack(ModItems.TRIANGLE_ARMOR.get())),
-            chapter("stage3.azure_dragon", "stage3", 1, new ItemStack(ModItems.AZURE_DRAGON_SCALE.get()))
+            chapter("stage3.azure_dragon", "stage3", 9, new ItemStack(ModItems.AZURE_DRAGON_SCALE.get()))
     );
 
     private int bookLeft;
@@ -103,7 +103,7 @@ public class SevenStarsCodexScreen extends Screen {
             Component stage = Component.translatable("codex.sevenstars." + chapter.stageKey())
                     .withStyle(ChatFormatting.DARK_GRAY);
             graphics.drawString(font, stage, bookLeft + 28, y + 2, 0x6B5841, false);
-            Component chapterTitle = unlocked ? chapter.title() : Component.translatable("codex.sevenstars.locked");
+            Component chapterTitle = unlocked ? chapter.title() : chapter.lockedTitle();
             graphics.drawString(font, font.plainSubstrByWidth(chapterTitle.getString(), LIST_WIDTH - 39),
                     bookLeft + 28, y + 11, unlocked ? 0x2C2118 : 0x777067, false);
         }
@@ -116,13 +116,12 @@ public class SevenStarsCodexScreen extends Screen {
         int contentWidth = contentRight - contentLeft;
         boolean unlocked = ClientCodexData.isUnlocked(chapter.id());
 
-        Component heading = unlocked ? chapter.title() : Component.translatable("codex.sevenstars.locked");
+        Component heading = unlocked ? chapter.title() : chapter.lockedTitle();
         graphics.drawCenteredString(font, heading, contentLeft + contentWidth / 2, bookTop + 30,
                 unlocked ? 0x4D2D18 : 0x6F6A63);
         graphics.fill(contentLeft + 12, bookTop + 43, contentRight - 12, bookTop + 44, 0x806B4A28);
 
-        Component body = unlocked ? Component.translatable(chapter.pageKey(page))
-                : Component.translatable("codex.sevenstars.locked.body");
+        Component body = unlocked ? Component.translatable(chapter.pageKey(page)) : chapter.lockedBody();
         int y = bookTop + 53;
         for (FormattedCharSequence line : font.split(body, contentWidth)) {
             if (y > bookTop + BOOK_HEIGHT - 39) {
@@ -204,6 +203,20 @@ public class SevenStarsCodexScreen extends Screen {
     private record Chapter(String id, String stageKey, int pageCount, ItemStack icon) {
         private Component title() {
             return Component.translatable("codex.sevenstars.chapter." + id + ".title");
+        }
+
+        private Component lockedTitle() {
+            if ("stage3.azure_dragon".equals(id)) {
+                return Component.translatable("codex.sevenstars.chapter.stage3.azure_dragon.locked_title");
+            }
+            return Component.translatable("codex.sevenstars.locked");
+        }
+
+        private Component lockedBody() {
+            if ("stage3.azure_dragon".equals(id)) {
+                return Component.translatable("codex.sevenstars.chapter.stage3.azure_dragon.unlock_hint");
+            }
+            return Component.translatable("codex.sevenstars.locked.body");
         }
 
         private String pageKey(int page) {

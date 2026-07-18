@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sevenstars:item/broken_scroll"
+  },
+  "overrides": [
+    {"predicate": {"custom_model_data": 1}, "model": "sevenstars:item/light_wave_projectile"}
+  ]
+}

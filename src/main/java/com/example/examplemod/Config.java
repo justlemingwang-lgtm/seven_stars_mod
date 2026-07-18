@@ -95,7 +95,7 @@ public class Config
 
     private static final ForgeConfigSpec.DoubleValue NEGATIVE_QI_PROTECTION_RECOVER_PERCENT = BUILDER
             .comment("Percent of max Qi restored after negative Qi backlash triggers.")
-            .defineInRange("skill.negativeQiProtectionRecoverPercent", 0.33D, 0.0D, 1.0D);
+            .defineInRange("skill.negativeQiProtectionRecoverPercent", 0.50D, 0.0D, 1.0D);
 
     private static final ForgeConfigSpec.BooleanValue TOOLS_TRIGGER_NEGATIVE_QI_PENALTY = BUILDER
             .comment("Whether test tools can trigger negative Qi backlash.")
@@ -217,7 +217,7 @@ public class Config
     public static String castSelectedSkillKeyDefault = "R";
     public static boolean enableNegativeQiPenalty = true;
     public static double negativeQiHealthPercentDamage = 0.33D;
-    public static double negativeQiProtectionRecoverPercent = 0.33D;
+    public static double negativeQiProtectionRecoverPercent = 0.50D;
     public static boolean toolsTriggerNegativeQiPenalty = false;
     public static int playerHurtQiLossMin = 5;
     public static int playerHurtQiLossMax = 10;
@@ -316,7 +316,14 @@ public class Config
         castSelectedSkillKeyDefault = CAST_SELECTED_SKILL_KEY_DEFAULT.get();
         enableNegativeQiPenalty = ENABLE_NEGATIVE_QI_PENALTY.get();
         negativeQiHealthPercentDamage = NEGATIVE_QI_HEALTH_PERCENT_DAMAGE.get();
-        negativeQiProtectionRecoverPercent = NEGATIVE_QI_PROTECTION_RECOVER_PERCENT.get();
+        double configuredQiBreakRecovery = NEGATIVE_QI_PROTECTION_RECOVER_PERCENT.get();
+        if (Math.abs(configuredQiBreakRecovery - 0.33D) < 0.000001D) {
+            // Migrate the former default so existing worlds receive the new 50% protection too.
+            configuredQiBreakRecovery = 0.50D;
+            NEGATIVE_QI_PROTECTION_RECOVER_PERCENT.set(configuredQiBreakRecovery);
+            event.getConfig().save();
+        }
+        negativeQiProtectionRecoverPercent = configuredQiBreakRecovery;
         toolsTriggerNegativeQiPenalty = TOOLS_TRIGGER_NEGATIVE_QI_PENALTY.get();
         playerHurtQiLossMin = PLAYER_HURT_QI_LOSS_MIN.get();
         playerHurtQiLossMax = PLAYER_HURT_QI_LOSS_MAX.get();

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "sevenstars:block/writing_table_front",
+    "down": "sevenstars:block/writing_table_bottom",
+    "up": "sevenstars:block/writing_table_top",
+    "north": "sevenstars:block/writing_table_front",
+    "south": "sevenstars:block/writing_table_back",
+    "west": "sevenstars:block/writing_table_left",
+    "east": "sevenstars:block/writing_table_right"
+  }
+}
